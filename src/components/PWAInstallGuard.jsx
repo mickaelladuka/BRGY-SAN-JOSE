@@ -1,7 +1,148 @@
 import { useEffect, useState } from "react";
+import { Smartphone, Download, Share, ChevronDown, ZoomIn, X, Lock } from "lucide-react";
 
 import androidInstall from "../../assets/images/install/android.png";
 import safariInstall from "../../assets/images/install/safari.jpg";
+
+// ==================================================
+// STYLES (kept in this file, scoped under .pwg)
+// Same terracotta palette as the Annex 6 BMIS landing page.
+// Does not depend on Tailwind being available.
+// ==================================================
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.pwg {
+  --c-deep: #8C2F12;
+  --c-primary: #C63F0A;
+  --c-accent: #E76F32;
+  --bg: #FFF8F2;
+  --bg-alt: #F6EDE5;
+  --card: #FFFFFF;
+  --dark: #252525;
+  --text: #252525;
+  --text-2: #74665E;
+  --border: #E8DCD2;
+  --surface: #F2E6DC;
+  --highlight: #F4B183;
+  --ease: cubic-bezier(.22,.61,.36,1);
+
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  position: relative;
+  overflow-x: clip;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+.pwg *, .pwg *::before, .pwg *::after { box-sizing: border-box; }
+:where(.pwg) h1, :where(.pwg) h2, :where(.pwg) h3, :where(.pwg) p, :where(.pwg) ol, :where(.pwg) ul, :where(.pwg) figure { margin: 0; padding: 0; }
+:where(.pwg) ol, :where(.pwg) ul { list-style: none; }
+:where(.pwg) button { font-family: inherit; }
+.pwg :focus-visible { outline: 3px solid var(--c-accent); outline-offset: 3px; }
+
+/* quiet background decoration */
+.pwg-bg { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.pwg-bg::before {
+  content: ''; position: absolute; width: 640px; height: 640px; border-radius: 50%;
+  right: -220px; top: -260px; border: 80px solid rgba(198,63,10,.06);
+}
+.pwg-bg::after {
+  content: ''; position: absolute; width: 520px; height: 520px; border-radius: 50%;
+  left: -260px; bottom: -280px; background: radial-gradient(circle, rgba(244,177,131,.35), rgba(244,177,131,0) 70%);
+}
+
+/* ============ CARD ============ */
+.pwg-card {
+  position: relative; z-index: 1; width: 100%; max-width: 440px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 24px;
+  padding: clamp(1.5rem, 4vw, 2.25rem); text-align: center;
+  box-shadow: 0 24px 60px rgba(140,47,18,.12), 0 2px 6px rgba(37,37,37,.04);
+  transition: max-width .35s var(--ease);
+}
+.pwg-card.is-open { max-width: 760px; }
+
+.pwg-seal { width: 84px; height: 84px; margin: 0 auto 1.25rem; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: grid; place-items: center; padding: 6px; }
+.pwg-seal img { width: 100%; height: 100%; object-fit: contain; }
+
+.pwg h1 { font-size: clamp(1.6rem, 4.5vw, 2rem); font-weight: 800; letter-spacing: -.025em; line-height: 1.1; color: var(--text); }
+.pwg-sub { margin-top: .6rem; font-size: .95rem; line-height: 1.65; color: var(--text-2); }
+
+.pwg-notice {
+  display: flex; gap: .9rem; align-items: flex-start; text-align: left;
+  margin-top: 1.5rem; padding: 1rem 1.1rem; border-radius: 14px;
+  background: var(--bg-alt); border: 1px solid var(--border); border-left: 4px solid var(--c-primary);
+}
+.pwg-notice-icon { flex: none; width: 38px; height: 38px; border-radius: 10px; background: var(--c-deep); color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+.pwg-notice strong { display: block; font-size: .95rem; color: var(--c-deep); }
+.pwg-notice p { margin-top: .2rem; font-size: .85rem; line-height: 1.55; color: var(--text-2); }
+
+/* ============ BUTTON ============ */
+.pwg-btn {
+  margin-top: 1.5rem; width: 100%; min-height: 52px; padding: 0 1.5rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: .6rem;
+  border: 0; border-radius: 12px; cursor: pointer;
+  background: var(--c-primary); color: #fff; font-size: .98rem; font-weight: 700;
+  transition: background-color .2s var(--ease), box-shadow .2s var(--ease), transform .2s var(--ease);
+}
+.pwg-btn:hover { background: var(--c-deep); box-shadow: 0 8px 20px rgba(140,47,18,.28); }
+.pwg-btn:active { transform: translateY(1px); }
+.pwg-btn svg { transition: transform .25s var(--ease); }
+.pwg-btn[aria-expanded='true'] svg { transform: rotate(180deg); }
+
+/* ============ GALLERY ============ */
+.pwg-gallery { display: grid; grid-template-columns: 1fr; gap: 1.1rem; margin-top: 1.5rem; text-align: left; }
+@media (min-width: 640px) { .pwg-gallery { grid-template-columns: 1fr 1fr; } }
+
+.pwg-step { background: var(--bg); border: 1px solid var(--border); border-radius: 18px; padding: 1.1rem; display: flex; flex-direction: column; gap: .9rem; }
+.pwg-step-head { display: flex; align-items: center; gap: .65rem; }
+.pwg-step-head .pwg-badge { flex: none; width: 38px; height: 38px; border-radius: 10px; background: var(--surface); color: var(--c-primary); display: inline-flex; align-items: center; justify-content: center; }
+.pwg-step h2 { font-size: 1.02rem; font-weight: 800; letter-spacing: -.01em; color: var(--text); line-height: 1.2; }
+.pwg-step-browser { display: block; font-size: .78rem; font-weight: 600; color: var(--text-2); margin-top: .1rem; }
+
+.pwg-steps-list { display: grid; gap: .6rem; }
+.pwg-steps-list li { display: flex; gap: .7rem; align-items: flex-start; font-size: .87rem; line-height: 1.5; color: var(--text); }
+.pwg-steps-list .n { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--c-deep); color: #fff; font-size: .72rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; margin-top: .05rem; }
+.pwg-chip { display: inline-block; padding: .05rem .5rem; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--c-deep); font-weight: 700; font-size: .92em; white-space: nowrap; }
+
+.pwg-phone { width: min(210px, 100%); margin: .25rem auto 0; padding: 8px; border-radius: 30px; background: var(--dark); box-shadow: 0 14px 30px rgba(37,37,37,.25); }
+.pwg-phone-screen { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 23px; overflow: hidden; background: #fff; cursor: zoom-in; }
+.pwg-phone-screen img { display: block; width: 100%; height: auto; max-height: 380px; object-fit: contain; background: #fff; transition: transform .4s var(--ease); }
+.pwg-phone-screen:hover img { transform: scale(1.03); }
+.pwg-zoom { position: absolute; right: 8px; bottom: 8px; display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .6rem; border-radius: 999px; background: rgba(37,37,37,.85); color: #fff; font-size: .68rem; font-weight: 600; pointer-events: none; }
+
+.pwg-help { margin-top: 1.25rem; font-size: .82rem; line-height: 1.6; color: var(--text-2); }
+
+/* ============ LIGHTBOX ============ */
+.pwg-lightbox { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem; padding: 1rem; background: rgba(20,20,20,.9); }
+.pwg-lightbox img { max-height: 85vh; max-width: 100%; border-radius: 14px; background: #fff; object-fit: contain; }
+.pwg-lightbox p { color: #fff; font-weight: 600; font-size: .9rem; }
+.pwg-lightbox-close { position: absolute; top: 1rem; right: 1rem; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,.16); color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color .2s var(--ease); }
+.pwg-lightbox-close:hover { background: rgba(255,255,255,.28); }
+
+/* ============ LOADING ============ */
+.pwg-loading { position: relative; z-index: 1; text-align: center; }
+.pwg-spinner { width: 44px; height: 44px; margin: 0 auto 1rem; border-radius: 50%; border: 4px solid var(--surface); border-top-color: var(--c-primary); }
+.pwg-loading p { font-size: .9rem; font-weight: 600; color: var(--text-2); }
+
+/* ============ MOTION ============ */
+@media (prefers-reduced-motion: no-preference) {
+  .pwg-card { animation: pwg-rise .6s var(--ease) both; }
+  .pwg-gallery { animation: pwg-rise .45s var(--ease) both; }
+  .pwg-spinner { animation: pwg-spin .8s linear infinite; }
+  @keyframes pwg-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes pwg-spin { to { transform: rotate(360deg); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pwg *, .pwg *::before, .pwg *::after { transition-duration: .01ms !important; animation: none !important; }
+}
+`;
 
 export default function PWAInstallGuard({
     children,
@@ -124,15 +265,13 @@ export default function PWAInstallGuard({
 
     if (checking) {
         return (
-            <div className="min-h-screen bg-[#F1F1F1] flex items-center justify-center">
-                <div className="text-center">
+            <div className="pwg" role="status" aria-live="polite">
+                <style>{CSS}</style>
+                <div className="pwg-bg" aria-hidden="true" />
 
-                    <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#106A2E]" />
-
-                    <p className="text-sm text-slate-500">
-                        Loading Annex 6 BMIS...
-                    </p>
-
+                <div className="pwg-loading">
+                    <div className="pwg-spinner" aria-hidden="true" />
+                    <p>Loading Annex 6 BMIS...</p>
                 </div>
             </div>
         );
@@ -191,271 +330,133 @@ function InstallRequired() {
     }, [zoomed]);
 
     return (
-        <div className="min-h-screen bg-[#F7F5EF] flex items-center justify-center px-4 py-8 sm:p-6">
+        <div className="pwg">
+            <style>{CSS}</style>
 
             {/* BACKGROUND */}
-
-            <div className="pointer-events-none fixed inset-0 overflow-hidden">
-
-                <div
-                    className="
-                        absolute
-                        -left-28
-                        -top-28
-                        h-96
-                        w-96
-                        rounded-full
-                        bg-emerald-400/10
-                        blur-3xl
-                    "
-                />
-
-                <div
-                    className="
-                        absolute
-                        right-[-140px]
-                        top-[30%]
-                        h-[32rem]
-                        w-[32rem]
-                        rounded-full
-                        bg-cyan-300/10
-                        blur-3xl
-                    "
-                />
-
-                <div
-                    className="
-                        absolute
-                        bottom-[-120px]
-                        left-[30%]
-                        h-[28rem]
-                        w-[28rem]
-                        rounded-full
-                        bg-amber-300/10
-                        blur-3xl
-                    "
-                />
-
-            </div>
-
+            <div className="pwg-bg" aria-hidden="true" />
 
             {/* INSTALL CARD */}
-
             {/* The card widens once the gallery is open,
                 so the screenshots get real room instead of
                 being squeezed into the compact card. */}
+            <main className={`pwg-card ${showSteps ? "is-open" : ""}`}>
 
-            <div
-                className={`
-                    relative
-                    z-10
-                    w-full
-                    rounded-3xl
-                    border
-                    border-slate-200
-                    bg-white
-                    p-6
-                    text-center
-                    shadow-xl
-                    transition-[max-width]
-                    duration-300
-                    sm:p-8
-                    ${showSteps ? "max-w-2xl" : "max-w-md"}
-                `}
-            >
-
-                {/* ICON */}
-
-                <div
-                    className="
-                        mx-auto
-                        mb-5
-                        flex
-                        h-16
-                        w-16
-                        items-center
-                        justify-center
-                        rounded-2xl
-                        bg-gradient-to-br
-                        from-[#106A2E]
-                        to-[#0E3B22]
-                        shadow-lg
-                        shadow-emerald-900/20
-                    "
-                >
-
-                    <svg
-                        width="30"
-                        height="30"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                        <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                    </svg>
-
+                {/* LOGO */}
+                <div className="pwg-seal">
+                    <img
+                        src="/San_Jose_LOGO.webp"
+                        alt="Barangay San Jose logo"
+                        width="72"
+                        height="72"
+                    />
                 </div>
 
-
                 {/* TITLE */}
-
-                <h1 className="text-2xl font-bold text-slate-800">
-                    Annex 6 BMIS
-                </h1>
-
+                <h1>Annex 6 BMIS</h1>
 
                 {/* DESCRIPTION */}
-
-                <p className="mt-2 text-sm leading-6 text-slate-500">
+                <p className="pwg-sub">
                     Annex 6 BMIS is available as an
                     installed application.
                 </p>
 
-
                 {/* INFORMATION */}
+                <div className="pwg-notice" role="note">
+                    <span className="pwg-notice-icon" aria-hidden="true">
+                        <Lock size={18} />
+                    </span>
 
-                <div className="mt-6 rounded-2xl bg-emerald-50 p-4 text-left">
+                    <div>
+                        <strong>Install the app to continue</strong>
 
-                    <p className="text-sm font-semibold text-[#106A2E]">
-                        Install the app to continue
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-emerald-700">
-                        This system cannot be accessed
-                        directly from a normal browser
-                        window.
-                    </p>
-
+                        <p>
+                            This system cannot be accessed
+                            directly from a normal browser
+                            window.
+                        </p>
+                    </div>
                 </div>
 
-
                 {/* HOW TO INSTALL BUTTON */}
-
                 <button
                     type="button"
-                    onClick={() =>
-                        setShowSteps((v) => !v)
-                    }
+                    className="pwg-btn"
+                    onClick={() => setShowSteps((v) => !v)}
                     aria-expanded={showSteps}
-                    className="
-                        mt-6
-                        w-full
-                        inline-flex
-                        items-center
-                        justify-center
-                        gap-2
-                        rounded-xl
-                        bg-[#106A2E]
-                        px-5
-                        py-3.5
-                        text-sm
-                        font-semibold
-                        text-white
-                        shadow-lg
-                        transition
-                        hover:bg-[#0d5927]
-                        active:scale-[0.98]
-                    "
+                    aria-controls="pwg-gallery"
                 >
                     How to Install
-
-                    <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className={`transition-transform ${
-                            showSteps
-                                ? "rotate-180"
-                                : ""
-                        }`}
-                    >
-                        <path d="m6 9 6 6 6-6" />
-                    </svg>
+                    <ChevronDown size={18} aria-hidden="true" />
                 </button>
 
                 {/* STEP-BY-STEP GALLERY */}
                 {/* Mobile install steps only: the two portrait screenshots
                     sit side by side on wider screens and stack on a phone. */}
-
                 {showSteps && (
-                    <div className="mt-5 grid grid-cols-1 gap-4 text-left sm:grid-cols-2">
+                    <div className="pwg-gallery" id="pwg-gallery">
                         <InstallStep
                             image={androidInstall}
                             platform="Android"
-                            hint="Chrome: tap the menu, then Install app"
-                            orientation="portrait"
+                            browser="Chrome"
+                            icon={<Download size={18} />}
+                            steps={[
+                                <>Tap the <span className="pwg-chip">⋮ menu</span> in Chrome.</>,
+                                <>Tap <span className="pwg-chip">Install app</span> or <span className="pwg-chip">Add to Home screen</span>.</>,
+                                <>Open Annex 6 BMIS from your Home Screen.</>,
+                            ]}
                             onZoom={setZoomed}
                         />
 
                         <InstallStep
                             image={safariInstall}
                             platform="iPhone / iPad"
-                            hint="Safari: tap Share, then Add to Home Screen"
-                            orientation="portrait"
+                            browser="Safari"
+                            icon={<Share size={18} />}
+                            steps={[
+                                <>Tap the <span className="pwg-chip">Share</span> button in Safari.</>,
+                                <>Tap <span className="pwg-chip">Add to Home Screen</span>.</>,
+                                <>Open Annex 6 BMIS from your Home Screen.</>,
+                            ]}
                             onZoom={setZoomed}
                         />
                     </div>
                 )}
 
                 {/* HELP TEXT */}
-
-                <p className="mt-4 text-xs leading-5 text-slate-400">
+                <p className="pwg-help">
                     Once installed, open Annex 6 BMIS
                     from the Home Screen.
                 </p>
 
-            </div>
+            </main>
 
 
             {/* ENLARGED SCREENSHOT */}
-
             {zoomed && (
                 <div
                     role="dialog"
                     aria-modal="true"
                     aria-label={`Install guide for ${zoomed.platform}`}
                     onClick={() => setZoomed(null)}
-                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 p-4"
+                    className="pwg-lightbox"
                 >
                     <button
                         type="button"
                         onClick={() => setZoomed(null)}
                         aria-label="Close"
-                        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+                        className="pwg-lightbox-close"
                     >
-                        <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M18 6 6 18M6 6l12 12" />
-                        </svg>
+                        <X size={20} aria-hidden="true" />
                     </button>
 
                     <img
                         src={zoomed.image}
                         alt={`How to install Annex 6 BMIS on ${zoomed.platform}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="max-h-[85vh] max-w-full rounded-xl bg-white object-contain"
                     />
 
-                    <p className="mt-3 text-sm font-medium text-white">
-                        {zoomed.platform}
-                    </p>
+                    <p>{zoomed.platform}</p>
                 </div>
             )}
 
@@ -467,63 +468,61 @@ function InstallRequired() {
 // ==================================================
 // ONE INSTALL STEP
 // ==================================================
-// A screenshot card. The image is never
-// cropped (object-contain) and is no longer
-// forced into a fixed-height box, which is
-// what made the portrait phone screenshots
-// tiny:
-//
-//   portrait  - keeps its natural shape, up to
-//               28rem tall, centered.
-//   landscape - fills the card width, up to
-//               22rem tall.
-//
-// Tapping the screenshot opens it full screen.
+// A platform card: short numbered steps and the
+// real screenshot inside a phone frame. The image
+// is never cropped (object-contain). Tapping the
+// screenshot opens it full screen.
 
 function InstallStep({
     image,
     platform,
-    hint,
-    orientation = "landscape",
+    browser,
+    icon,
+    steps,
     onZoom,
 }) {
-    const isPortrait = orientation === "portrait";
-
     return (
-        <div
-            className={`rounded-2xl border border-slate-200 bg-slate-50 p-3 ${
-                isPortrait ? "" : "sm:col-span-2"
-            }`}
-        >
-            <button
-                type="button"
-                onClick={() => onZoom?.({ image, platform })}
-                aria-label={`Enlarge the ${platform} install guide`}
-                className="relative block w-full overflow-hidden rounded-xl bg-white"
-            >
-                <img
-                    src={image}
-                    alt={`How to install Annex 6 BMIS on ${platform}`}
-                    loading="lazy"
-                    className={`block h-auto object-contain ${
-                        isPortrait
-                            ? "mx-auto max-h-[28rem] w-auto max-w-full"
-                            : "max-h-[22rem] w-full"
-                    }`}
-                />
+        <section className="pwg-step">
 
-                <span className="pointer-events-none absolute bottom-2 right-2 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-medium text-white">
-                    Tap to enlarge
+            <div className="pwg-step-head">
+                <span className="pwg-badge" aria-hidden="true">
+                    {icon ?? <Smartphone size={18} />}
                 </span>
-            </button>
 
-            <p className="mt-2.5 text-sm font-semibold text-slate-800">
-                {platform}
-            </p>
+                <h2>
+                    {platform}
+                    <span className="pwg-step-browser">{browser}</span>
+                </h2>
+            </div>
 
-            <p className="mt-0.5 text-xs leading-4 text-slate-500">
-                {hint}
-            </p>
-        </div>
+            <ol className="pwg-steps-list">
+                {steps.map((s, i) => (
+                    <li key={i}>
+                        <span className="n" aria-hidden="true">{i + 1}</span>
+                        <span>{s}</span>
+                    </li>
+                ))}
+            </ol>
+
+            <div className="pwg-phone">
+                <button
+                    type="button"
+                    className="pwg-phone-screen"
+                    onClick={() => onZoom?.({ image, platform })}
+                    aria-label={`Enlarge the ${platform} install guide`}
+                >
+                    <img
+                        src={image}
+                        alt={`How to install Annex 6 BMIS on ${platform}`}
+                        loading="lazy"
+                    />
+
+                    <span className="pwg-zoom">
+                        <ZoomIn size={12} aria-hidden="true" /> Tap to enlarge
+                    </span>
+                </button>
+            </div>
+
+        </section>
     );
 }
