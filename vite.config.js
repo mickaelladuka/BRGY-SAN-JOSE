@@ -22,9 +22,24 @@ export default defineConfig({
         lang: 'en',
         categories: ['government', 'utilities'],
         icons: [
-          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          { src: '/pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { 
+            src: '/San_Jose_LOGO.webp',
+            sizes: '192x192',
+            type: 'image/webp',
+            purpose: 'any'
+          },
+          {
+            src: '/San_Jose_LOGO.webp',
+            sizes: '512x512',
+            type: 'image/webp',
+            purpose: 'any'
+          },
+          {
+            src: '/San_Jose_LOGO.webp',
+            sizes: '512x512',
+            type: 'image/webp',
+            purpose: 'maskable'
+          }
         ],
       },
       workbox: {
