@@ -130,7 +130,7 @@ export default function PWAInstallGuard({
                     <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#106A2E]" />
 
                     <p className="text-sm text-slate-500">
-                        Loading CDM OneServe...
+                        Loading Annex 6 BMIS...
                     </p>
 
                 </div>
@@ -304,14 +304,14 @@ function InstallRequired() {
                 {/* TITLE */}
 
                 <h1 className="text-2xl font-bold text-slate-800">
-                    CDM OneServe
+                    Annex 6 BMIS
                 </h1>
 
 
                 {/* DESCRIPTION */}
 
                 <p className="mt-2 text-sm leading-6 text-slate-500">
-                    CDM OneServe is available as an
+                    Annex 6 BMIS is available as an
                     installed application.
                 </p>
 
@@ -409,7 +409,7 @@ function InstallRequired() {
                 {/* HELP TEXT */}
 
                 <p className="mt-4 text-xs leading-5 text-slate-400">
-                    Once installed, open CDM OneServe
+                    Once installed, open Annex 6 BMIS
                     from the Home Screen.
                 </p>
 
@@ -448,7 +448,7 @@ function InstallRequired() {
 
                     <img
                         src={zoomed.image}
-                        alt={`How to install CDM OneServe on ${zoomed.platform}`}
+                        alt={`How to install Annex 6 BMIS on ${zoomed.platform}`}
                         onClick={(e) => e.stopPropagation()}
                         className="max-h-[85vh] max-w-full rounded-xl bg-white object-contain"
                     />
@@ -503,7 +503,7 @@ function InstallStep({
             >
                 <img
                     src={image}
-                    alt={`How to install CDM OneServe on ${platform}`}
+                    alt={`How to install Annex 6 BMIS on ${platform}`}
                     loading="lazy"
                     className={`block h-auto object-contain ${
                         isPortrait

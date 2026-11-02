@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { PublicOnly, RequireRole } from './components/Guards'
+import PWAInstallGuard from './components/PWAInstallGuard'
 import ResidentLayout from './components/ResidentLayout'
 import AdminLayout from './components/AdminLayout'
 import Landing from './pages/public/Landing'
@@ -30,14 +31,14 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
-      <Route path="/register" element={<PublicOnly><Register /></PublicOnly>} />
+      <Route path="/login" element={<PWAInstallGuard><PublicOnly><Login /></PublicOnly></PWAInstallGuard>} />
+      <Route path="/register" element={<PWAInstallGuard><PublicOnly><Register /></PublicOnly></PWAInstallGuard>} />
       <Route path="/directory" element={<PublicDirectory />} />
       <Route path="/officials" element={<PublicDirectory />} />
       <Route path="/departments" element={<PublicDirectory />} />
 
 
-      <Route path="/resident" element={<RequireRole role="Resident"><ResidentLayout /></RequireRole>}>
+      <Route path="/resident" element={<PWAInstallGuard><RequireRole role="Resident"><ResidentLayout /></RequireRole></PWAInstallGuard>}>
         <Route index element={<ResidentDashboard />} />
         <Route path="profile" element={<Profile />} />
         <Route path="complaints" element={<Track />} />
@@ -51,7 +52,7 @@ export default function App() {
       <Route path="departments" element={<PublicDirectory />} />
       </Route>
 
-      <Route path="/admin" element={<RequireRole role="Admin" allowStaff><AdminLayout /></RequireRole>}>
+      <Route path="/admin" element={<PWAInstallGuard><RequireRole role="Admin" allowStaff><AdminLayout /></RequireRole></PWAInstallGuard>}>
         <Route index element={<AdminDashboard />} />
         <Route path="residents" element={<ResidentsView />} />
         <Route path="complaints" element={<ComplaintsView />} />
