@@ -26,7 +26,7 @@ const NAV = [
   { id: 'home', label: 'Home' },
   { id: 'about', label: 'About' },
   { id: 'services', label: 'Services' },
-  { id: 'how', label: 'How It Works' },
+  { id: 'how-it-works', label: 'How It Works' },
   { id: 'community', label: 'Know Your Community' },
   { id: 'faq', label: 'FAQ' },
 ]
