@@ -1,9 +1,9 @@
 
 import { Navigate, Route, Routes } from 'react-router-dom'
 
+// Components and Guards
 import { PublicOnly, RequireRole } from './components/Guards'
 import PWAInstallGuard from './components/PWAInstallGuard'
-
 import ResidentLayout from './components/ResidentLayout'
 import AdminLayout from './components/AdminLayout'
 
@@ -12,39 +12,41 @@ import Landing from './pages/public/Landing'
 import Login from './pages/public/Login'
 import Register from './pages/public/Register'
 import PublicDirectory from './pages/public/PublicDirectory'
+import NotFound from './pages/public/NotFound'
 
 // Resident Pages
-import ResidentDashboard from './pages/resident/ResidentDashboard'
+import ResidentDashboard from './pages/resident/Dashboard'
 import Profile from './pages/resident/Profile'
 import Track from './pages/resident/Track'
 import ComplaintNew from './pages/resident/ComplaintNew'
 import SmartClassify from './pages/resident/SmartClassify'
 import ReportNew from './pages/resident/ReportNew'
 import TrackDetail from './pages/resident/TrackDetail'
-import ResidentAnnouncements from './pages/resident/ResidentAnnouncements'
+import ResidentAnnouncements from './pages/resident/Announcements'
+import FileHub from './pages/resident/FileHub'
 
 // Admin Pages
-import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminDashboard from './pages/admin/Dashboard'
 import ResidentsView from './pages/admin/ResidentsView'
 import ComplaintsView from './pages/admin/ComplaintsView'
-import ReportsPage from './pages/admin/ReportsPage'
-import OperationsPage from './pages/admin/OperationsPage'
-import AnnouncementsPage from './pages/admin/AnnouncementsPage'
-import AuditLogsPage from './pages/admin/AuditLogsPage'
-import CommunityIssuesPage from './pages/admin/CommunityIssuesPage'
 import DepartmentsView from './pages/admin/DepartmentsView'
-import ApplicationsPage from './pages/admin/ApplicationsPage'
 import ApplicationReview from './pages/admin/ApplicationReview'
 import LocationVerificationPage from './pages/admin/LocationVerificationPage'
 import DocumentVerificationPage from './pages/admin/DocumentVerificationPage'
-import FileHub from './pages/admin/FileHub'
 
-// Other Pages
-import NotFound from './pages/NotFound'
+// Admin Module Pages
+import {
+  ReportsPage,
+  OperationsPage,
+  AnnouncementsPage,
+  AuditLogsPage,
+  CommunityIssuesPage,
+  ApplicationsPage,
+} from './pages/admin/modulePages'
 
 
 // ============================================
-// PWA DETECTION
+// PWA INSTALLATION DETECTION
 // ============================================
 
 function isPWAInstalled() {
@@ -73,8 +75,15 @@ function isPWAInstalled() {
 
 // ============================================
 // HOME ROUTE
-// Browser = Landing Page
-// Installed PWA = Login Page
+//
+// Normal Browser:
+// Display Public Landing Page
+//
+// Installed PWA:
+// Redirect to Login
+//
+// PublicOnly will redirect authenticated
+// users to their assigned dashboard.
 // ============================================
 
 function HomeRoute() {
@@ -87,7 +96,7 @@ function HomeRoute() {
 
 
 // ============================================
-// MAIN APP
+// MAIN APPLICATION ROUTES
 // ============================================
 
 export default function App() {
@@ -98,7 +107,10 @@ export default function App() {
           PUBLIC ROUTES
       ====================================== */}
 
-      <Route path="/" element={<HomeRoute />} />
+      <Route
+        path="/"
+        element={<HomeRoute />}
+      />
 
       <Route
         path="/login"
@@ -124,9 +136,20 @@ export default function App() {
 
       {/* Public Information Pages */}
 
-      <Route path="/directory" element={<PublicDirectory />} />
-      <Route path="/officials" element={<PublicDirectory />} />
-      <Route path="/departments" element={<PublicDirectory />} />
+      <Route
+        path="/directory"
+        element={<PublicDirectory />}
+      />
+
+      <Route
+        path="/officials"
+        element={<PublicDirectory />}
+      />
+
+      <Route
+        path="/departments"
+        element={<PublicDirectory />}
+      />
 
 
       {/* ======================================
@@ -143,17 +166,36 @@ export default function App() {
           </PWAInstallGuard>
         }
       >
-        <Route index element={<ResidentDashboard />} />
 
-        <Route path="profile" element={<Profile />} />
+        <Route
+          index
+          element={<ResidentDashboard />}
+        />
 
-        <Route path="complaints" element={<Track />} />
+        <Route
+          path="profile"
+          element={<Profile />}
+        />
 
-        <Route path="complaints/new" element={<ComplaintNew />} />
+        <Route
+          path="complaints"
+          element={<Track />}
+        />
 
-        <Route path="classify" element={<SmartClassify />} />
+        <Route
+          path="complaints/new"
+          element={<ComplaintNew />}
+        />
 
-        <Route path="reports/new" element={<ReportNew />} />
+        <Route
+          path="classify"
+          element={<SmartClassify />}
+        />
+
+        <Route
+          path="reports/new"
+          element={<ReportNew />}
+        />
 
         <Route
           path="track/:kind/:id"
@@ -165,11 +207,21 @@ export default function App() {
           element={<ResidentAnnouncements />}
         />
 
-        <Route path="directory" element={<PublicDirectory />} />
+        <Route
+          path="directory"
+          element={<PublicDirectory />}
+        />
 
-        <Route path="officials" element={<PublicDirectory />} />
+        <Route
+          path="officials"
+          element={<PublicDirectory />}
+        />
 
-        <Route path="departments" element={<PublicDirectory />} />
+        <Route
+          path="departments"
+          element={<PublicDirectory />}
+        />
+
       </Route>
 
 
@@ -187,29 +239,51 @@ export default function App() {
           </PWAInstallGuard>
         }
       >
-        <Route index element={<AdminDashboard />} />
 
-        <Route path="residents" element={<ResidentsView />} />
+        <Route
+          index
+          element={<AdminDashboard />}
+        />
 
-        <Route path="complaints" element={<ComplaintsView />} />
+        <Route
+          path="residents"
+          element={<ResidentsView />}
+        />
 
-        <Route path="reports" element={<ReportsPage />} />
+        <Route
+          path="complaints"
+          element={<ComplaintsView />}
+        />
 
-        <Route path="operations" element={<OperationsPage />} />
+        <Route
+          path="reports"
+          element={<ReportsPage />}
+        />
+
+        <Route
+          path="operations"
+          element={<OperationsPage />}
+        />
 
         <Route
           path="announcements"
           element={<AnnouncementsPage />}
         />
 
-        <Route path="audit-logs" element={<AuditLogsPage />} />
+        <Route
+          path="audit-logs"
+          element={<AuditLogsPage />}
+        />
 
         <Route
           path="community-issues"
           element={<CommunityIssuesPage />}
         />
 
-        <Route path="officials" element={<DepartmentsView />} />
+        <Route
+          path="officials"
+          element={<DepartmentsView />}
+        />
 
         <Route
           path="applications"
@@ -231,15 +305,22 @@ export default function App() {
           element={<DocumentVerificationPage />}
         />
 
-        <Route path="file" element={<FileHub />} />
+        <Route
+          path="file"
+          element={<FileHub />}
+        />
+
       </Route>
 
 
       {/* ======================================
-          404 NOT FOUND
+          404 - NOT FOUND
       ====================================== */}
 
-      <Route path="*" element={<NotFound />} />
+      <Route
+        path="*"
+        element={<NotFound />}
+      />
 
     </Routes>
   )
