@@ -13,7 +13,7 @@ export default function ApplicationReview() {
   const [app, setApp] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('Overview')
   const [reviewBusy, setReviewBusy] = useState(false)
   const [openedTabs, setOpenedTabs] = useState(() => new Set(['Overview']))
   const [reviewMsg, setReviewMsg] = useState('')
