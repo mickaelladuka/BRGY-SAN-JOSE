@@ -114,8 +114,16 @@ export default function VisitorLog() {
         dateTo: reportForm.dateTo || null,
         reportTitle: reportForm.reportTitle,
       })
-      // trigger download
-      window.open(`${api.defaults?.baseURL || ''}/api/admin/visitors/reports/${data.id}/download`, '_blank')
+      // trigger download with auth token
+      const res = await api.get(`/api/admin/visitors/reports/${data.id}/download`, { responseType: 'blob' })
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const a = document.createElement('a')
+      a.href = url
+      a.download = data.fileName || 'report'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
       setFlash(`Report generated (${data.recordCount} records).`)
       setShowReport(false)
     } catch (err) { setError(getErrorMessage(err)) }
