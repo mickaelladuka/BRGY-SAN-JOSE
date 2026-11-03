@@ -193,8 +193,8 @@ export const applications = {
   ],
   rowActions: [
     { label: 'Review', show: () => true, navigate: (r) => `/admin/applications/${r.id}` },
-    { label: 'Verify', show: (r) => r.status !== 'Verified', confirm: (r) => `Verify ${r.fullName}?`, success: 'Application verified.', run: (r) => api.put(`/api/applications/${r.id}/review`, { status: 'Verified', remarks: 'Verified by admin' }) },
-    { label: 'Reject', danger: true, show: (r) => r.status !== 'Rejected', confirm: (r) => `Reject ${r.fullName}?`, success: 'Application rejected.', run: (r) => api.put(`/api/applications/${r.id}/review`, { status: 'Rejected', remarks: 'Rejected by admin' }) },
+    { label: 'Verify', show: (r) => r.status !== 'Verified', confirm: (r) => `Verify ${r.fullName}?`, success: 'Application verified.', run: (r) => api.post(`/api/admin/resident-registrations/${r.id}/review`, { status: 'Verified', remarks: 'Verified by admin' }) },
+    { label: 'Reject', danger: true, show: (r) => r.status !== 'Rejected', confirm: (r) => `Reject ${r.fullName}?`, success: 'Application rejected.', run: (r) => api.post(`/api/admin/resident-registrations/${r.id}/review`, { status: 'Rejected', remarks: 'Rejected by admin' }) },
   ],
 }
 
