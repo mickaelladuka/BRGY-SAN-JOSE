@@ -48,17 +48,28 @@ export default function ApplicationReview() {
     setReviewBusy(true)
     setReviewMsg('')
     try {
-      if (action === 'forward') {
-        await api.post(`/api/admin/resident-registrations/${id}/forward`, { notes: reviewNotes })
-        setReviewMsg('Application forwarded to Secretary for review.')
-      } else if (action === 'approve') {
-        await api.post(`/api/admin/resident-registrations/${id}/review`, { status: 'Verified', remarks: reviewNotes })
+      if (action === 'approve') {
+        await api.post(`/api/admin/resident-registrations/${id}/review`, { status: 'Verified', remarks: reviewNotes.trim() || null })
         setReviewMsg('Application approved. Resident account created.')
       } else if (action === 'reject') {
-        await api.post(`/api/admin/resident-registrations/${id}/review`, { status: 'Rejected', remarks: reviewNotes })
+        if (!reviewNotes.trim()) {
+          setError('A rejection reason is required.')
+          setReviewBusy(false)
+          return
+        }
+        if (!window.confirm('Reject this entire application? This decision applies to the complete resident application.')) {
+          setReviewBusy(false)
+          return
+        }
+        await api.post(`/api/admin/resident-registrations/${id}/review`, { status: 'Rejected', remarks: reviewNotes.trim() })
         setReviewMsg('Application rejected.')
       } else if (action === 'request-correction') {
-        await api.post(`/api/admin/resident-registrations/${id}/request-correction`, { notes: reviewNotes })
+        if (!reviewNotes.trim()) {
+          setError('A correction reason is required.')
+          setReviewBusy(false)
+          return
+        }
+        await api.post(`/api/admin/resident-registrations/${id}/request-correction`, { notes: reviewNotes.trim() })
         setReviewMsg('Correction requested. Resident will be notified.')
       }
       await loadApp()
@@ -201,7 +212,6 @@ export default function ApplicationReview() {
           <textarea id="review-notes" value={reviewNotes} onChange={(e) => setReviewNotes(e.target.value)} placeholder="Add review notes..." maxLength={1000} />
         </Field>
         <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
-          <button type="button" className="btn btn-outline btn-sm" onClick={() => handleAction('forward')} disabled={reviewBusy}>Forward to Secretary</button>
           <button type="button" className="btn btn-outline btn-sm" onClick={() => handleAction('request-correction')} disabled={reviewBusy}>Request Correction</button>
           <button type="button" className="btn btn-primary btn-sm" onClick={() => handleAction('approve')} disabled={reviewBusy}>Approve</button>
           <button type="button" className="btn btn-danger btn-sm" onClick={() => handleAction('reject')} disabled={reviewBusy}>Reject</button>
