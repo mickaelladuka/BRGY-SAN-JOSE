@@ -113,8 +113,8 @@ export default function VisitorLog() {
       <Alert onClose={() => setError('')}>{error}</Alert>
 
       <div style={{ display: 'flex', gap: '.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        {['overview', 'records', 'active'].map((t) => (
-          <button key={t} type="button" className={`btn btn-sm ${tab === t ? 'btn-primary' : 'btn-outline'}`} onClick={() => setTab(t)}>{t === 'overview' ? 'Overview' : t === 'records' ? 'Visitor Records' : 'Active Visitors'}</button>
+        {['overview', 'records', 'active', 'completed'].map((t) => (
+          <button key={t} type="button" className={`btn btn-sm ${tab === t ? 'btn-primary' : 'btn-outline'}`} onClick={() => setTab(t)}>{t === 'overview' ? 'Overview' : t === 'records' ? 'Visitor Records' : t === 'active' ? 'Active Visitors' : 'Completed Visits'}</button>
         ))}
       </div>
 
@@ -131,7 +131,7 @@ export default function VisitorLog() {
         </div>
       )}
 
-      {(tab === 'records' || tab === 'active') && (
+      {(tab === 'records' || tab === 'active' || tab === 'completed') && (
         <div>
           <div className="toolbar" role="search" style={{ marginBottom: '1rem' }}>
             <div className="field grow"><label htmlFor="vq">Search</label><input id="vq" type="search" value={q} placeholder="Code, name, contact, purpose" onChange={(e) => { setQ(e.target.value); setPage(1) }} /></div>
@@ -150,7 +150,7 @@ export default function VisitorLog() {
               <table>
                 <thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Purpose</th><th>Dept</th><th>Time In</th><th>Time Out</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {records.items.filter((r) => tab === 'active' ? r.status === 'INSIDE' : true).map((r) => (
+                  {records.items.filter((r) => tab === 'active' ? r.status === 'INSIDE' : tab === 'completed' ? r.status === 'COMPLETED' : true).map((r) => (
                     <tr key={r.id}>
                       <td>{r.visitorCode}</td>
                       <td>{r.visitorName}</td>
