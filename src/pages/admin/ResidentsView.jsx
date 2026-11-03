@@ -48,7 +48,7 @@ export default function ResidentsView() {
       // Load documents
       try {
         const { data: docs } = await api.get(`/api/residents/${r.id}/documents`)
-        setDocuments(docs || [])
+        setDocuments(toPage(docs).items || [])
       } catch { setDocuments([]) }
       // Load complaints (filtered by resident)
       try {

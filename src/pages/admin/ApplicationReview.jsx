@@ -33,7 +33,7 @@ export default function ApplicationReview() {
       // Load documents
       try {
         const { data: docs } = await api.get(`/api/admin/resident-registrations/${id}/documents`)
-        setDocuments(docs || [])
+        setDocuments(toPage(docs).items || [])
       } catch { setDocuments([]) }
     } catch (err) {
       setError(getErrorMessage(err))
