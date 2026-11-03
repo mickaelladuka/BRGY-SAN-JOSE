@@ -280,7 +280,9 @@ export default function ResidentsView() {
                   </div>
                   <div style={{ padding: '.5rem', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)', background: 'var(--cream)' }}>
                     <div style={{ fontSize: '.75rem', color: 'var(--muted-c)' }}>Documents</div>
-                    <div style={{ fontWeight: 600, color: '#A85D08' }}>Pending</div>
+                    <div style={{ fontWeight: 600, color: documents.length && documents.every((d) => d.status === 'Verified') ? '#287A4B' : '#A85D08' }}>
+                      {documents.length && documents.every((d) => d.status === 'Verified') ? 'Verified' : 'Pending'}
+                    </div>
                   </div>
                   <div style={{ padding: '.5rem', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)', background: 'var(--cream)' }}>
                     <div style={{ fontSize: '.75rem', color: 'var(--muted-c)' }}>Address</div>
@@ -328,7 +330,7 @@ export default function ResidentsView() {
                 </div>
                 <div style={{ padding: '.75rem', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)', background: 'var(--cream)' }}>
                   <div style={{ fontWeight: 600, marginBottom: '.25rem' }}>Document Verification</div>
-                  <div style={{ fontSize: '.85rem', color: 'var(--muted-c)' }}>Status: <span style={{ color: '#A85D08', fontWeight: 600 }}>Pending</span></div>
+                  <div style={{ fontSize: '.85rem', color: 'var(--muted-c)' }}>Status: <span style={{ color: documents.length && documents.every((d) => d.status === 'Verified') ? '#287A4B' : '#A85D08', fontWeight: 600 }}>{documents.length && documents.every((d) => d.status === 'Verified') ? 'Verified' : 'Pending'}</span></div>
                 </div>
                 <div style={{ padding: '.75rem', border: '1px solid var(--line)', borderRadius: 'var(--radius-sm)', background: 'var(--cream)' }}>
                   <div style={{ fontWeight: 600, marginBottom: '.25rem' }}>Residential Address Verification</div>
