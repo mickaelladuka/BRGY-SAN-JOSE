@@ -124,11 +124,11 @@ export default function VisitorLog() {
       {tab === 'overview' && (
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Total Today</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.TotalToday ?? 0}</div></div>
-            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Currently Inside</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.CurrentlyInside ?? 0}</div></div>
-            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Completed Today</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.CompletedToday ?? 0}</div></div>
-            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Total This Month</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.TotalThisMonth ?? 0}</div></div>
-            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Pending Attention</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.PendingAttention ?? 0}</div></div>
+            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Total Today</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.totalToday ?? 0}</div></div>
+            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Currently Inside</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.currentlyInside ?? 0}</div></div>
+            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Completed Today</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.completedToday ?? 0}</div></div>
+            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Total This Month</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.totalThisMonth ?? 0}</div></div>
+            <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Pending Attention</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.pendingAttention ?? 0}</div></div>
           </div>
           <div className="card" style={{ height: '260px' }}>
             <ResponsiveContainer width="100%" height="100%">
