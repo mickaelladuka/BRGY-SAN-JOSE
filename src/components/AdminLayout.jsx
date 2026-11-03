@@ -11,6 +11,7 @@ const NAV = [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   ] },
   { section: 'Management', items: [
+    { to: '/admin/visitors', label: "Visitor's Log", icon: ClipboardList },
     { to: '/admin/residents', label: 'Residents', icon: Users, hasSubmenu: true, submenu: [
       { to: '/admin/residents', label: 'All Residents', icon: Users },
       { to: '/admin/applications', label: 'Resident Applications', icon: FileText },

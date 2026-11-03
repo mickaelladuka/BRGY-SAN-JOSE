@@ -24,6 +24,7 @@ import ReportNew from './pages/resident/ReportNew'
 import TrackDetail from './pages/resident/TrackDetail'
 import ResidentAnnouncements from './pages/resident/Announcements'
 import FileHub from './pages/resident/FileHub'
+import VisitorLog from './pages/admin/VisitorLog'
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard'
@@ -308,6 +309,10 @@ export default function App() {
         <Route
           path="file"
           element={<FileHub />}
+        />
+        <Route
+          path="visitors"
+          element={<VisitorLog />}
         />
 
       </Route>
