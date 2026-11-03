@@ -15,6 +15,7 @@ export default function ApplicationReview() {
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('overview')
   const [reviewBusy, setReviewBusy] = useState(false)
+  const [openedTabs, setOpenedTabs] = useState(() => new Set(['Overview']))
   const [reviewMsg, setReviewMsg] = useState('')
   const [reviewNotes, setReviewNotes] = useState('')
   const [showCorrection, setShowCorrection] = useState(false)
@@ -43,6 +44,7 @@ export default function ApplicationReview() {
   }
 
   useEffect(() => { loadApp() }, [id])
+  useEffect(() => { setOpenedTabs((prev) => { const next = new Set(prev); next.add(activeTab); return next }) }, [activeTab])
 
   const handleAction = async (action) => {
     setReviewBusy(true)
@@ -213,7 +215,7 @@ export default function ApplicationReview() {
         </Field>
         <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
           <button type="button" className="btn btn-outline btn-sm" onClick={() => handleAction('request-correction')} disabled={reviewBusy}>Request Correction</button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => handleAction('approve')} disabled={reviewBusy}>Approve</button>
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => handleAction('approve')} disabled={reviewBusy || openedTabs.size < TABS.length} title={openedTabs.size < TABS.length ? 'Review all sections first' : ''}>Approve</button>
           <button type="button" className="btn btn-danger btn-sm" onClick={() => handleAction('reject')} disabled={reviewBusy}>Reject</button>
         </div>
       </div>
