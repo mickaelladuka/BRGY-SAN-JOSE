@@ -23,6 +23,9 @@ export default function VisitorLog() {
   const [pageSize] = useState(10)
 
   const [showCheckIn, setShowCheckIn] = useState(false)
+  const [showReport, setShowReport] = useState(false)
+  const [reporting, setReporting] = useState(false)
+  const [reportForm, setReportForm] = useState({ reportType: 'Full', format: 'csv', dateFrom: '', dateTo: '', reportTitle: 'Visitor Log Report' })
   const [form, setForm] = useState({ visitorName: '', visitorType: 'Resident', residentId: '', contactNumber: '', address: '', purposeOfVisit: PURPOSES[0], departmentId: '', personToVisitId: '', numberOfCompanions: 0, notes: '' })
   const [saving, setSaving] = useState(false)
   const [departments, setDepartments] = useState([])
@@ -93,6 +96,25 @@ export default function VisitorLog() {
     } catch (err) { setError(getErrorMessage(err)) }
   }
 
+  const handleGenerate = async (e) => {
+    e.preventDefault()
+    setReporting(true); setError('')
+    try {
+      const { data } = await api.post('/api/admin/visitors/reports/generate', {
+        reportType: reportForm.reportType,
+        format: reportForm.format,
+        dateFrom: reportForm.dateFrom || null,
+        dateTo: reportForm.dateTo || null,
+        reportTitle: reportForm.reportTitle,
+      })
+      // trigger download
+      window.open(`${api.defaults?.baseURL || ''}/api/admin/visitors/reports/${data.id}/download`, '_blank')
+      setFlash(`Report generated (${data.recordCount} records).`)
+      setShowReport(false)
+    } catch (err) { setError(getErrorMessage(err)) }
+    finally { setReporting(false) }
+  }
+
   const handleCorrect = async (id) => {
     const reason = window.prompt('Reason for correction:')
     if (!reason) return
@@ -109,7 +131,10 @@ export default function VisitorLog() {
     <div>
       <div className="page-head">
         <h1>Visitor's Log</h1>
-        <button type="button" className="btn btn-primary" onClick={() => setShowCheckIn(true)}>Register Visitor / Check In</button>
+        <div style={{ display: 'flex', gap: '.5rem' }}>
+          <button type="button" className="btn btn-outline" onClick={() => setShowReport(true)}>Generate Visitor Report</button>
+          <button type="button" className="btn btn-primary" onClick={() => setShowCheckIn(true)}>Register Visitor / Check In</button>
+        </div>
       </div>
 
       <Alert type="success" onClose={() => setFlash('')}>{flash}</Alert>
@@ -187,6 +212,25 @@ export default function VisitorLog() {
           )}
           <Pagination page={page} pageSize={pageSize} total={records.total} onChange={setPage} />
         </div>
+      )}
+
+      {showReport && (
+        <Modal title="Generate Visitor Report" onClose={() => setShowReport(false)} footer={
+          <>
+            <button type="button" className="btn btn-outline" onClick={() => setShowReport(false)} disabled={reporting}>Cancel</button>
+            <button type="submit" form="report-form" className="btn btn-primary" disabled={reporting}>{reporting ? 'Generating...' : 'Generate'}</button>
+          </>
+        }>
+          <form id="report-form" onSubmit={handleGenerate}>
+            <div className="form-grid">
+              <div><Field label="Report Title" htmlFor="rt"><input id="rt" value={reportForm.reportTitle} onChange={(e) => setReportForm({ ...reportForm, reportTitle: e.target.value })} /></Field></div>
+              <div><Field label="Report Type" htmlFor="rty"><select id="rty" value={reportForm.reportType} onChange={(e) => setReportForm({ ...reportForm, reportType: e.target.value })}><option>Full</option><option>Daily</option><option>Weekly</option><option>Monthly</option></select></Field></div>
+              <div><Field label="Format" htmlFor="rf"><select id="rf" value={reportForm.format} onChange={(e) => setReportForm({ ...reportForm, format: e.target.value })}><option value="csv">CSV</option><option value="xlsx">Excel</option><option value="pdf">PDF</option></select></Field></div>
+              <div><Field label="From" htmlFor="rdf"><input id="rdf" type="date" value={reportForm.dateFrom} onChange={(e) => setReportForm({ ...reportForm, dateFrom: e.target.value })} /></Field></div>
+              <div><Field label="To" htmlFor="rdt"><input id="rdt" type="date" value={reportForm.dateTo} onChange={(e) => setReportForm({ ...reportForm, dateTo: e.target.value })} /></Field></div>
+            </div>
+          </form>
+        </Modal>
       )}
 
       {showCheckIn && (
