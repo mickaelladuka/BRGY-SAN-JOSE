@@ -11,7 +11,8 @@ const PURPOSES = ['Inquiry / General Assistance', 'Complaint-Related Consultatio
 export default function VisitorLog() {
   const [tab, setTab] = useState('overview')
   const [dashboard, setDashboard] = useState(null)
-  const [analytics, setAnalytics] = useState([])
+  const [period, setPeriod] = useState('24h')
+  const [periodRecords, setPeriodRecords] = useState([])
   const [records, setRecords] = useState({ items: [], total: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -33,7 +34,6 @@ export default function VisitorLog() {
 
   const loadDashboard = async () => {
     try { const { data } = await api.get('/api/admin/visitors/dashboard'); setDashboard(data) } catch (e) { /* ignore */ }
-    try { const { data } = await api.get('/api/admin/visitors/analytics'); setAnalytics(Array.isArray(data) ? data : []) } catch (e) { /* ignore */ }
   }
 
   const loadRecords = async () => {
@@ -47,6 +47,13 @@ export default function VisitorLog() {
   }
 
   useEffect(() => { loadDashboard() }, [])
+  useEffect(() => {
+    const now = new Date()
+    const from = period === '24h' ? new Date(now.getTime() - 24*60*60*1000) : period === '7d' ? new Date(now.getTime() - 7*24*60*60*1000) : new Date(now.getTime() - 30*24*60*60*1000)
+    api.get('/api/admin/visitors', { params: { dateFrom: from.toISOString().slice(0,10), pageSize: 50 } })
+      .then(({ data }) => setPeriodRecords(toPage(data).items || []))
+      .catch(() => setPeriodRecords([]))
+  }, [period])
   useEffect(() => { if (tab === 'records' || tab === 'active') loadRecords() }, [tab, page, q, filters])
 
   useEffect(() => {
@@ -155,15 +162,20 @@ export default function VisitorLog() {
             <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Total This Month</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.totalThisMonth ?? 0}</div></div>
             <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Pending Attention</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.pendingAttention ?? 0}</div></div>
           </div>
-          <div className="card" style={{ height: '260px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={analytics}>
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#C63F0A" />
-              </BarChart>
-            </ResponsiveContainer>
+          <div style={{ display: 'flex', gap: '.5rem', marginBottom: '.75rem' }}>
+            {['24h', '7d', '30d'].map((p) => (
+              <button key={p} type="button" className={`btn btn-sm ${period === p ? 'btn-primary' : 'btn-outline'}`} onClick={() => setPeriod(p)}>{p === '24h' ? '24 Hours' : p === '7d' ? '7 Days' : '30 Days'}</button>
+            ))}
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Purpose</th><th>Time In</th><th>Status</th></tr></thead>
+              <tbody>
+                {periodRecords.length === 0 ? <tr><td colSpan={6}>No records</td></tr> : periodRecords.map((r) => (
+                  <tr key={r.id}><td>{r.visitorCode}</td><td>{r.visitorName}</td><td>{r.visitorType}</td><td>{r.purposeOfVisit}</td><td>{fmtDateTime(r.timeIn)}</td><td>{r.status}</td></tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
