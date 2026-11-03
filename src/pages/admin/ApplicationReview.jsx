@@ -210,6 +210,9 @@ export default function ApplicationReview() {
       {/* Review Actions */}
       <div className="card" style={{ marginTop: '1rem' }}>
         <div className="card-head"><h2>Review Actions</h2></div>
+        <p className="muted" style={{ fontSize: '.8rem', marginBottom: '.75rem' }}>
+          Review all six sections first. The Approve button becomes available only after every section has been opened. Approve and Reject apply to the complete application.
+        </p>
         <Field label="Notes" htmlFor="review-notes">
           <textarea id="review-notes" value={reviewNotes} onChange={(e) => setReviewNotes(e.target.value)} placeholder="Add review notes..." maxLength={1000} />
         </Field>
