@@ -3,6 +3,7 @@ import { api, toPage, getErrorMessage } from '../../lib/api'
 import { fmtDate, fmtDateTime } from '../../lib/format'
 import { Alert, EmptyState, Field, Modal, Pagination, SkeletonList } from '../../components/ui'
 import { Users, ClipboardList, LogIn, LogOut, Search } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 const TYPES = ['Resident', 'Non-Resident', 'Government Personnel', 'Organization Representative', 'Service Provider / Contractor', 'Other']
 const PURPOSES = ['Inquiry / General Assistance', 'Complaint-Related Consultation', 'Document Request', 'Certificate or Clearance-Related Transaction', 'Department Consultation', 'Follow-Up Transaction', 'Meeting / Appointment', 'Official Government Business', 'Delivery / Service', 'Other']
@@ -10,6 +11,7 @@ const PURPOSES = ['Inquiry / General Assistance', 'Complaint-Related Consultatio
 export default function VisitorLog() {
   const [tab, setTab] = useState('overview')
   const [dashboard, setDashboard] = useState(null)
+  const [analytics, setAnalytics] = useState([])
   const [records, setRecords] = useState({ items: [], total: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -28,6 +30,7 @@ export default function VisitorLog() {
 
   const loadDashboard = async () => {
     try { const { data } = await api.get('/api/admin/visitors/dashboard'); setDashboard(data) } catch (e) { /* ignore */ }
+    try { const { data } = await api.get('/api/admin/visitors/analytics'); setAnalytics(Array.isArray(data) ? data : []) } catch (e) { /* ignore */ }
   }
 
   const loadRecords = async () => {
@@ -127,7 +130,16 @@ export default function VisitorLog() {
             <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Total This Month</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.TotalThisMonth ?? 0}</div></div>
             <div className="card"><div className="muted" style={{ fontSize: '.75rem' }}>Pending Attention</div><div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{dashboard?.PendingAttention ?? 0}</div></div>
           </div>
-          <div className="card"><EmptyState title="Visitor activity chart">Chart aggregation endpoint not yet implemented.</EmptyState></div>
+          <div className="card" style={{ height: '260px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={analytics}>
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="count" fill="#C63F0A" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
 
