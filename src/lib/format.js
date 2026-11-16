@@ -24,6 +24,8 @@ export const nowInput = () => toDateTimeInput(new Date().toISOString())
 export const COMPLAINT_STATUSES = ['Submitted', 'Under Review', 'Assigned', 'In Progress', 'Resolved', 'Closed', 'Rejected', 'Reopened']
 export const COMPLAINT_PRIORITIES = ['Low', 'Medium', 'High', 'Critical']
 export const REPORT_STATUSES = COMPLAINT_STATUSES
+export const REPORT_SEVERITIES = COMPLAINT_PRIORITIES
+export const REPORT_VERIFICATION_STATUSES = ['Pending', 'Under Verification', 'Verified', 'Invalid', 'Duplicate']
 export const FIRE_STATUSES = ['Reported', 'Responding', 'Contained', 'Resolved', 'Closed']
 export const COMPLAINT_CATEGORIES = ['Noise', 'Garbage / Waste', 'Infrastructure', 'Peace and Order', 'Neighbor Dispute', 'Public Safety', 'Other']
 export const REPORT_CATEGORIES = ['Public Disturbance', 'Hazard / Risk', 'Road / Infrastructure', 'Lost and Found', 'Other']

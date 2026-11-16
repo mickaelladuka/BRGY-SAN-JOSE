@@ -2,7 +2,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 // Components and Guards
-import { PublicOnly, RequireRole } from './components/Guards'
+import { PublicOnly, RequireAdminPermission, RequireRole } from './components/Guards'
 import PWAInstallGuard from './components/PWAInstallGuard'
 import ResidentLayout from './components/ResidentLayout'
 import AdminLayout from './components/AdminLayout'
@@ -43,7 +43,12 @@ import {
   AuditLogsPage,
   CommunityIssuesPage,
   ApplicationsPage,
+  OfficialsPage,
 } from './pages/admin/modulePages'
+import ComplaintSchedulingPage from './pages/admin/ComplaintSchedulingPage'
+import ResidentComplaintAppointments from './pages/resident/ComplaintAppointments'
+import { defaultAdminPath } from './lib/adminNavigation'
+import { useAuth } from './context/AuthContext'
 
 
 // ============================================
@@ -91,8 +96,24 @@ function HomeRoute() {
   if (isPWAInstalled()) {
     return <Navigate to="/login" replace />
   }
-
   return <Landing />
+}
+
+function AdminHomeRoute() {
+  const { role } = useAuth()
+  const path = defaultAdminPath(role)
+  return path === '/admin' ? <AdminDashboard /> : <Navigate to={path} replace />
+}
+
+function AdminNoAccess() {
+  return (
+    <section className="card" role="status" style={{ maxWidth: '640px', margin: '2rem auto' }}>
+      <h1 style={{ marginTop: 0 }}>No administrative modules assigned</h1>
+      <p className="muted" style={{ marginBottom: 0 }}>
+        Your account does not currently have an assigned administrative workspace. Contact the OIC for access.
+      </p>
+    </section>
+  )
 }
 
 
@@ -184,6 +205,11 @@ export default function App() {
         />
 
         <Route
+          path="complaints/schedules"
+          element={<ResidentComplaintAppointments />}
+        />
+
+        <Route
           path="complaints/new"
           element={<ComplaintNew />}
         />
@@ -243,76 +269,90 @@ export default function App() {
 
         <Route
           index
-          element={<AdminDashboard />}
+          element={<AdminHomeRoute />}
         />
 
         <Route
           path="residents"
-          element={<ResidentsView />}
+          element={<RequireAdminPermission permission="residents"><ResidentsView /></RequireAdminPermission>}
         />
 
         <Route
           path="complaints"
-          element={<ComplaintsView />}
+          element={<RequireAdminPermission permission="complaints"><ComplaintsView /></RequireAdminPermission>}
+        />
+
+        <Route
+          path="complaints/scheduling"
+          element={<RequireAdminPermission permission="complaintScheduling"><ComplaintSchedulingPage /></RequireAdminPermission>}
         />
 
         <Route
           path="reports"
-          element={<ReportsPage />}
+          element={<RequireAdminPermission permission="reports"><ReportsPage /></RequireAdminPermission>}
         />
 
         <Route
           path="operations"
-          element={<OperationsPage />}
+          element={<RequireAdminPermission permission="operations"><OperationsPage /></RequireAdminPermission>}
         />
 
         <Route
           path="announcements"
-          element={<AnnouncementsPage />}
+          element={<RequireAdminPermission permission="announcements"><AnnouncementsPage /></RequireAdminPermission>}
         />
 
         <Route
           path="audit-logs"
-          element={<AuditLogsPage />}
+          element={<RequireAdminPermission permission="audit"><AuditLogsPage /></RequireAdminPermission>}
         />
 
         <Route
           path="community-issues"
-          element={<CommunityIssuesPage />}
+          element={<RequireAdminPermission permission="communityIssues"><CommunityIssuesPage /></RequireAdminPermission>}
         />
 
         <Route
           path="officials"
-          element={<DepartmentsView />}
+          element={<RequireAdminPermission permission="officials"><OfficialsPage /></RequireAdminPermission>}
+        />
+
+        <Route
+          path="departments"
+          element={<RequireAdminPermission permission="departments"><DepartmentsView /></RequireAdminPermission>}
         />
 
         <Route
           path="applications"
-          element={<ApplicationsPage />}
+          element={<RequireAdminPermission permission="applications"><ApplicationsPage /></RequireAdminPermission>}
         />
 
         <Route
           path="applications/:id"
-          element={<ApplicationReview />}
+          element={<RequireAdminPermission permission="applications"><ApplicationReview /></RequireAdminPermission>}
         />
 
         <Route
           path="location-verification"
-          element={<LocationVerificationPage />}
+          element={<RequireAdminPermission permission="locationVerification"><LocationVerificationPage /></RequireAdminPermission>}
         />
 
         <Route
           path="document-verification"
-          element={<DocumentVerificationPage />}
+          element={<RequireAdminPermission permission="documentVerification"><DocumentVerificationPage /></RequireAdminPermission>}
         />
 
         <Route
           path="file"
-          element={<FileHub />}
+          element={<RequireAdminPermission permission="files"><FileHub /></RequireAdminPermission>}
         />
         <Route
           path="visitors"
-          element={<VisitorLog />}
+          element={<RequireAdminPermission permission="visitors"><VisitorLog /></RequireAdminPermission>}
+        />
+        <Route
+          path="no-access"
+          element={<AdminNoAccess />}
         />
 
       </Route>

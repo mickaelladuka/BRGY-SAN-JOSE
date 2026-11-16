@@ -28,7 +28,7 @@ Status: every route below is now implemented in `Annex6-Backend` (written, not y
 |---|---|---|
 | ✅ | `GET /api/residents/me`, `PUT /api/residents/me` `{firstName,lastName,address,contactNumber}` | PUT creates the `Resident` row (linked by `UserId`) if missing; GET returns 404 if none. |
 | ✅ | `GET /api/complaints/mine`, `GET /api/complaints/{id}`, `POST /api/complaints` | `{category, subject, description, location}` → `{id, referenceNumber, submittedAt}`. `{id}` must 404/403 unless owned. Detail includes `history:[{id,status,remarks,changedAt}]`. |
-| ✅ | `GET /api/reports/mine`, `GET /api/reports/{id}`, `POST /api/reports` | `{isEmergency, category, location, description}` → `{id, referenceNumber, submittedAt}`. Same ownership rule. |
+| ✅ | `GET /api/reports/mine`, `GET /api/reports/{id}`, `POST /api/reports` | `{isEmergency, category, location, latitude, longitude, description}` → `{id, referenceNumber, submittedAt}`. Persist and return `latitude`/`longitude` with report records so the admin map can show the exact selected pin. Same ownership rule. |
 | ✅ | `GET /api/announcements` | Published and not archived only. Items: `{id,title,content,category,publishedAt}`. |
 
 ## Admin (role `Admin`)
@@ -36,8 +36,8 @@ Status: every route below is now implemented in `Annex6-Backend` (written, not y
 |---|---|---|
 | ✅ | `GET /api/dashboard/summary` | `{residents, complaints, pendingReports, emergencyReports, announcements}` from real counts. |
 | ✅ | `/api/residents` GET (`q`, `archived`), POST, PUT `/{id}`, DELETE `/{id}` | DELETE = archive (`IsArchived=true`). Reject duplicates. |
-| ✅ | `GET /api/complaints` (`q`, `status`, `dateFrom`, `dateTo`), `GET /{id}`, `POST /{id}/status` `{status, remarks}` | Status change writes `ComplaintStatusHistory` + audit log in one transaction. Detail adds `residentName`. |
-| ✅ | `GET /api/reports` (`q`, `type`=emergency\|non-emergency, `source`=guest\|resident, `status`, dates), `GET /{id}`, `POST /{id}/status` | Detail adds `residentName`, `guestName`, `guestContact`. |
+| ✅ | `GET /api/complaints` (`q`, `status`, `dateFrom`, `dateTo`, `sortOrder`=newest\|oldest), `GET /{id}`, `POST /{id}/status` `{status, remarks}` | Sort by submission time before pagination. Status change writes `ComplaintStatusHistory` + audit log in one transaction. Detail adds `residentName`. |
+| ✅ | `GET /api/reports` (`q`, `type`=emergency\|non-emergency, `source`=guest\|resident, `status`, `sortOrder`=newest\|oldest), `GET /{id}`, `POST /{id}/status` | Sort by submission time before pagination. Detail adds `residentName`, `guestName`, `guestContact`. |
 | ✅ | `/api/operations` GET (`q`, dates), POST, PUT `/{id}` | `{title, date, responsiblePersonnel, description, remarks}` |
 | ✅ | `/api/fire-rescue` GET (`q`, `fireRelated`, `status`, dates), POST, PUT `/{id}`; `GET /api/fire-rescue/summary` | `summary` → `{total, fireRelated, otherResponse, active, resolved}` (optional; hidden if missing). POST generates `referenceNumber`. |
 | ✅ | `GET /api/announcements/manage` (`q`, `state`=draft\|published\|archived), POST, PUT `/{id}`, `POST /{id}/publish`, `POST /{id}/archive` | |

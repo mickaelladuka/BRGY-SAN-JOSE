@@ -20,7 +20,11 @@ export default function StatusReviewModal({ endpoint, row, config, onClose, onCh
     if (status === rec.status && !remarks.trim()) return setError('Choose a new status or add remarks.')
     setBusy(true)
     try {
-      await api.post(`${endpoint}/${row.id}/status`, { status, remarks: remarks.trim() || null })
+      await api.post(`${endpoint}/${row.id}/status`, {
+        status,
+        remarks: remarks.trim() || null,
+        ...(config.publicStatusUpdates ? { publicUpdate: true } : {}),
+      })
       setRemarks(''); setOk('Status updated. The resident can now see this update.'); await load(); onChanged()
     } catch (err) { setError(getErrorMessage(err)) } finally { setBusy(false) }
   }
@@ -28,7 +32,7 @@ export default function StatusReviewModal({ endpoint, row, config, onClose, onCh
   const viewOnly = !config.statuses || config.statuses.length === 0
 
   return (
-    <Modal title={viewOnly ? `View Resident #${rec?.id ?? ''}` : `Review ${rec?.referenceNumber ?? ''}`} wide onClose={onClose}>
+    <Modal title={viewOnly ? `${config.viewTitle || 'View Resident'} #${rec?.id ?? ''}` : `Review ${rec?.referenceNumber ?? ''}`} wide onClose={onClose}>
       <Alert>{error}</Alert><Alert type="success">{ok}</Alert>
       {!rec ? <SkeletonList count={1} lines={6} /> : (
         <>

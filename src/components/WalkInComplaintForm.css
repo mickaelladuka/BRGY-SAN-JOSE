@@ -1,0 +1,22 @@
+.walkin-stepper { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1rem; }
+.walkin-stepper span { border: 1px solid var(--line); border-radius: 999px; padding: .3rem .65rem; color: var(--muted-c); font-size: .78rem; }
+.walkin-stepper span.active { border-color: var(--primary); background: var(--primary-surface); color: var(--primary-dark); font-weight: 700; }
+.walkin-stepper span.complete { border-color: #9ac9aa; color: #17613c; }
+.walkin-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
+.walkin-form-grid > label, .walkin-field { display: grid; gap: .35rem; min-width: 0; font-size: .86rem; font-weight: 650; }
+.walkin-form-grid input:not([type=checkbox]), .walkin-form-grid select, .walkin-form-grid textarea { width: 100%; min-width: 0; min-height: 40px; padding: .55rem .65rem; border: 1px solid var(--line-dark); border-radius: var(--radius-sm); background: #fff; color: var(--ink); font: inherit; font-weight: 400; }
+.walkin-form-grid textarea { min-height: 90px; resize: vertical; }
+.walkin-full { grid-column: 1 / -1; }
+.walkin-muted, .walkin-form-grid small { color: var(--muted-c); font-size: .78rem; font-weight: 400; }
+.walkin-selected-resident { display: grid; gap: .45rem; padding: .75rem; background: var(--cream); border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: .85rem; }
+.walkin-checkbox { display: flex !important; grid-template-columns: auto 1fr; align-items: flex-start; gap: .55rem !important; font-weight: 500 !important; }
+.walkin-checkbox input { width: 17px; height: 17px; margin: .15rem 0 0; }
+.walkin-resident-results { display: grid; max-height: 220px; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.walkin-resident-results button { display: grid; gap: .15rem; width: 100%; padding: .65rem; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: #fff; cursor: pointer; }
+.walkin-resident-results button:hover { background: var(--cream); }
+.walkin-resident-results button span { color: var(--muted-c); font-size: .78rem; }
+.walkin-review-summary { display: grid; gap: .55rem; }
+.walkin-review-summary > div { padding: .5rem .65rem; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.walkin-review-summary p { margin: .25rem 0 0; white-space: pre-wrap; }
+.walkin-review-warning { margin: .5rem 0 0; padding: .7rem; border-radius: var(--radius-sm); background: var(--amber-light); color: #754300; }
+@media (max-width: 620px) { .walkin-form-grid { grid-template-columns: 1fr; } .walkin-full { grid-column: 1; } }

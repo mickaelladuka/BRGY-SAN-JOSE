@@ -1,0 +1,44 @@
+.complaint-source-metrics { display: flex; flex-wrap: wrap; gap: .45rem; margin: 0 0 .85rem; }
+.complaint-source-metrics span { border: 1px solid var(--line); background: #fff; padding: .35rem .55rem; border-radius: 999px; font-size: .76rem; color: var(--muted-c); }
+.complaint-source-metrics strong { color: var(--ink); }
+.complaint-source-tag { padding: .12rem .38rem; border-radius: 999px; background: #F3F4F6; color: #4B5563; font-weight: 700; font-size: .7rem; }
+.complaint-source-tag.walkin { background: #E0F2FE; color: #075985; }
+.complaint-results-actions { display: flex; align-items: center; justify-content: flex-end; gap: .55rem; min-width: 0; }
+.complaint-sort-control select { min-height: 36px; max-width: 145px; padding: .35rem 1.8rem .35rem .55rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #fff; color: var(--ink); font: inherit; font-size: .8rem; }
+.complaint-filters { display: grid; gap: .55rem; margin-bottom: .85rem; }
+.complaint-primary-filters { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(110px, .34fr) minmax(145px, .42fr); align-items: end; gap: .5rem; }
+.complaint-search { position: relative; display: flex; align-items: center; min-width: 0; }
+.complaint-search > svg { position: absolute; left: .65rem; color: var(--muted-c); pointer-events: none; }
+.complaint-search input, .complaint-filter-field input, .complaint-filter-field select { width: 100%; min-width: 0; min-height: 38px; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #fff; color: var(--ink); font: inherit; font-size: .84rem; }
+.complaint-search input { padding-left: 2rem; }
+.complaint-filter-field { display: grid; gap: .2rem; min-width: 0; color: var(--muted-c); font-size: .7rem; font-weight: 650; }
+.complaint-advanced-filters { min-width: 0; }
+.complaint-advanced-toggle { display: inline-flex; align-items: center; gap: .4rem; min-height: 32px; padding: .25rem .4rem; border: 0; background: transparent; color: var(--muted-c); font: inherit; font-size: .8rem; cursor: pointer; }
+.complaint-advanced-toggle:hover { color: var(--primary-dark); }
+.complaint-advanced-toggle > svg:last-child { transition: transform .15s ease; }
+.complaint-advanced-toggle > svg:last-child.expanded { transform: rotate(180deg); }
+.complaint-filter-count { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--primary-surface); color: var(--primary-dark); font-size: .7rem; font-weight: 700; }
+.complaint-advanced-panel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; padding: .65rem 0 .25rem; }
+.complaint-active-filters { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; }
+.complaint-filter-chip { display: inline-flex; align-items: center; gap: .3rem; max-width: 100%; padding: .25rem .45rem; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--muted-c); font: inherit; font-size: .7rem; overflow-wrap: anywhere; cursor: pointer; }
+.complaint-filter-chip:hover { border-color: var(--primary); color: var(--primary-dark); }
+.complaint-filter-chip svg { flex: 0 0 auto; }
+.complaint-clear-filters { padding: .25rem .4rem; border: 0; background: transparent; color: var(--primary-dark); font: inherit; font-size: .72rem; text-decoration: underline; cursor: pointer; }
+.complaints-view-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "list details"; gap: 1rem; min-height: calc(100vh - 120px); }
+.complaints-list-card { grid-area: list; min-width: 0; overflow: auto; }
+@media (max-width: 700px) {
+  .complaint-primary-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .complaint-search { grid-column: 1 / -1; }
+  .complaint-advanced-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .complaint-results-actions { flex-wrap: wrap; }
+  .complaints-list-card > .card-head { align-items: flex-start; flex-wrap: wrap; }
+  .complaint-results-actions { width: 100%; justify-content: flex-start; }
+}
+@media (max-width: 440px) {
+  .complaint-primary-filters, .complaint-advanced-panel { grid-template-columns: minmax(0, 1fr); }
+  .complaint-search { grid-column: auto; }
+}
+@media (max-width: 900px) {
+  .complaints-view-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "list" "details"; }
+  .complaints-list-card { overflow: visible; }
+}

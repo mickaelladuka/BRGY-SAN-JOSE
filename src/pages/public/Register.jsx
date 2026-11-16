@@ -9,6 +9,7 @@ import {
   Megaphone, MessageSquareText, ShieldAlert, ShieldCheck,
 } from 'lucide-react'
 import AuthStyles from './AuthStyles'
+import ResidentApplicationCorrection from './ResidentApplicationCorrection'
 
 /* ------------------------------------------------------------------ */
 /* Config                                                              */
@@ -19,7 +20,7 @@ const DEFAULT_LOCATION_CODE = 'PHASE_1_L2_BAGONG_BUHAY' // preselected, but resi
 const MAX_MB = 5
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const REQUIRED_DOCS = ['idFront', 'photo2x2'] // set to [] if Area 6 policy allows registration without documents
-const DRAFT_KEY = 'annex6.registration.draft.v1' // sessionStorage only. Never holds passwords or files.
+const DRAFT_KEY = 'annex6.registration.draft.v2' // sessionStorage only. Never holds passwords or files.
 
 // No fabricated Area 6 coordinates: until the backend supplies a center/boundary the map shows the whole country.
 const FALLBACK_VIEW = { center: [12.8797, 121.774], zoom: 6 }
@@ -37,7 +38,7 @@ const PERKS = [
 const EMPTY = {
   firstName: '', middleName: '', lastName: '', suffix: '', dateOfBirth: '',
   mobileNumber: '', email: '',
-  areaLocationId: '', houseNumber: '', streetOrBlock: '', landmark: '',
+  areaLocationId: '', houseNumber: '', landmark: '',
   idType: '', idNumber: '',
   username: '', password: '', confirm: '',
 }
@@ -237,7 +238,7 @@ function MapPicker({ center, boundary, pin, onPick }) {
 /* ------------------------------------------------------------------ */
 /* Page                                                                */
 /* ------------------------------------------------------------------ */
-export default function Register() {
+function RegistrationForm() {
   const draft = useMemo(loadDraft, [])
   const [step, setStep] = useState(Math.min(draft.step ?? 0, STEPS.length - 1))
   const [f, setF] = useState({ ...EMPTY, ...(draft.f || {}), password: '', confirm: '' })
@@ -314,7 +315,6 @@ export default function Register() {
 
   const addressPreview = [
     f.houseNumber.trim(),
-    f.streetOrBlock.trim(),
     location?.name,
     'Area 6',
     'Barangay San Jose, Rodriguez, Rizal',
@@ -337,7 +337,7 @@ export default function Register() {
   const checkLocation = async () => {
     setGeoBusy(true)
     try {
-      const { data } = await api.post('/api/residents/validate-registration-location', {
+      const { data } = await api.post('/api/area-locations/validate-registration-location', {
         areaLocationId: f.areaLocationId,
         latitude: pin.lat,
         longitude: pin.lng,
@@ -351,6 +351,7 @@ export default function Register() {
     } finally {
       setGeoBusy(false)
     }
+
   }
 
   /* ---------------- validation ---------------- */
@@ -461,7 +462,6 @@ export default function Register() {
         password: f.password,
         areaLocationId: f.areaLocationId,
         houseNumber: f.houseNumber.trim(),
-        streetOrBlock: f.streetOrBlock.trim() || null,
         landmark: f.landmark.trim() || null,
         latitude: pin.lat,
         longitude: pin.lng,
@@ -593,14 +593,9 @@ export default function Register() {
         <span className="muted" style={{ fontSize: '.8rem' }}>Preselected as the demonstration location. You may choose another approved Area 6 location.</span>
       </Field>
 
-      <div style={two}>
-        <Field label="House / lot number" htmlFor="houseNumber" error={errors.houseNumber} required>
-          <input id="houseNumber" value={f.houseNumber} onChange={set('houseNumber')} placeholder="e.g. Block 1 Lot 5" />
-        </Field>
-        <Field label="Street / block" htmlFor="streetOrBlock" hint="Optional">
-          <input id="streetOrBlock" autoComplete="address-line2" value={f.streetOrBlock} onChange={set('streetOrBlock')} placeholder="Street, block or phase" />
-        </Field>
-      </div>
+      <Field label="House / lot number" htmlFor="houseNumber" error={errors.houseNumber} required>
+        <input id="houseNumber" value={f.houseNumber} onChange={set('houseNumber')} placeholder="e.g. Block 1 Lot 5" />
+      </Field>
       <Field label="Landmark" htmlFor="landmark" hint="Optional">
         <input id="landmark" value={f.landmark} onChange={set('landmark')} placeholder="Near the chapel, basketball court, etc." />
       </Field>
@@ -745,7 +740,6 @@ export default function Register() {
             ['Area', 'Area 6'],
             ['Location', location?.name || '—'],
             ['House / lot', f.houseNumber],
-            ['Street / block', f.streetOrBlock || '—'],
             ['Landmark', f.landmark || '—'],
           ],
         },
@@ -839,4 +833,11 @@ export default function Register() {
       </div>
     </main>
   )
+}
+
+export default function Register() {
+  const correctionToken = new URLSearchParams(window.location.search).get('correctionToken')
+  return correctionToken
+    ? <ResidentApplicationCorrection token={correctionToken} />
+    : <RegistrationForm />
 }

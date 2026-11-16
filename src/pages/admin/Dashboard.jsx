@@ -110,6 +110,7 @@ export default function Dashboard() {
     const activity = useFetch('/api/audit-logs', { page: 1, pageSize: 10 })
     const byStatus = useFetch('/api/dashboard/complaints-by-status')
     const byPriority = useFetch('/api/dashboard/complaints-by-priority')
+    const sourceAnalytics = useFetch('/api/complaints/analytics/source')
     const emerging = useFetch('/api/dashboard/emerging-issues')
     const perf     = useFetch('/api/dashboard/resolution-performance')
     const aging    = useFetch('/api/dashboard/aging-complaints')
@@ -415,6 +416,49 @@ export default function Dashboard() {
                         </SectionCard>
 
                     </div>
+
+                    <SectionCard title="Complaint Sources and Walk-in Intake">
+                        {sourceAnalytics.loading ? (
+                            <div style={{ textAlign: 'center', padding: '1rem' }}><Spinner /></div>
+                        ) : sourceAnalytics.error ? (
+                            <Alert>{sourceAnalytics.error}</Alert>
+                        ) : (
+                            <>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
+                                    {[
+                                        ['Total complaints', sourceAnalytics.data?.total],
+                                        ['Online', sourceAnalytics.data?.online],
+                                        ['Walk-in', sourceAnalytics.data?.walkIn],
+                                        ['Walk-in today', sourceAnalytics.data?.walkInToday],
+                                        ['Walk-in this month', sourceAnalytics.data?.walkInThisMonth],
+                                    ].map(([label, count]) => (
+                                        <div key={label} style={{ border: '1px solid #E8E3DB', borderRadius: '999px', padding: '6px 10px', fontSize: '12px', color: '#6B7280' }}>
+                                            {label}: <strong style={{ color: '#111827' }}>{count ?? 0}</strong>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '14px' }}>
+                                    {[
+                                        ['Walk-ins by category', sourceAnalytics.data?.walkInsByCategory],
+                                        ['Walk-ins by status', sourceAnalytics.data?.walkInsByStatus],
+                                        ['Walk-ins by location', sourceAnalytics.data?.walkInsByLocation],
+                                        ['Walk-ins by receiving personnel', sourceAnalytics.data?.walkInsByReceivingPersonnel],
+                                    ].map(([title, rows]) => (
+                                        <div key={title}>
+                                            <strong style={{ display: 'block', marginBottom: '6px', fontSize: '12px' }}>{title}</strong>
+                                            {rows?.length
+                                                ? rows.slice(0, 5).map((row) => (
+                                                    <div key={row.name} style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', padding: '3px 0', fontSize: '12px', color: '#6B7280' }}>
+                                                        <span style={{ overflowWrap: 'anywhere' }}>{row.name}</span><strong style={{ color: '#111827' }}>{row.count}</strong>
+                                                    </div>
+                                                ))
+                                                : <span style={{ color: '#9CA3AF', fontSize: '12px' }}>No walk-in complaints</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </SectionCard>
 
                     {/* RESOLUTION PERFORMANCE */}
                     <SectionCard title="Resolution Performance">

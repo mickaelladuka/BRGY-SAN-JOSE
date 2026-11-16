@@ -21,10 +21,10 @@ function FieldInput({ f, value, onChange, id }) {
  */
 export default function ResourcePage({ config }) {
   const navigate = useNavigate()
-  const { title, endpoint, createEndpoint, updateEndpoint, columns, fields = [], filters = [], searchPlaceholder = 'Search…', allowCreate, allowEdit, rowActions = [], review, reviewPath, header, pageSize = 10, toForm, toPayload } = config
+  const { title, endpoint, createEndpoint, updateEndpoint, columns, fields = [], filters = [], searchPlaceholder = 'Search…', allowCreate, allowEdit, rowActions = [], review, header, pageSize = 10, toForm, toPayload, refreshInterval, rowClassName } = config
   const [q, setQ] = useState('')
   const [debouncedQ, setDebouncedQ] = useState('')
-  const [fv, setFv] = useState({})
+  const [fv, setFv] = useState(() => config.initialFilters ?? (config.initialStatus ? { status: config.initialStatus } : {}))
   const [page, setPage] = useState(1)
   const [data, setData] = useState({ items: [], total: 0 })
   const [loading, setLoading] = useState(true)
@@ -54,6 +54,21 @@ export default function ResourcePage({ config }) {
   }, [endpoint, key, reloadKey])
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), [])
+
+  useEffect(() => {
+    if (!refreshInterval) return undefined
+    const refreshVisiblePage = () => {
+      if (document.visibilityState === 'visible') reload()
+    }
+    const timer = window.setInterval(refreshVisiblePage, refreshInterval)
+    window.addEventListener('focus', refreshVisiblePage)
+    document.addEventListener('visibilitychange', refreshVisiblePage)
+    return () => {
+      window.clearInterval(timer)
+      window.removeEventListener('focus', refreshVisiblePage)
+      document.removeEventListener('visibilitychange', refreshVisiblePage)
+    }
+  }, [refreshInterval, reload])
 
   const openForm = (row) => {
     setFormErrors({}); setFormError('')
@@ -90,6 +105,10 @@ export default function ResourcePage({ config }) {
   }
 
   const onAction = (action, row) => {
+    if (action.onClick) {
+      action.onClick(row)
+      return
+    }
     if (action.navigate) {
       navigate(action.navigate(row))
       return
@@ -132,7 +151,7 @@ export default function ResourcePage({ config }) {
             <thead><tr>{columns.map((c) => <th key={c.key} scope="col">{c.label}</th>)}{(review || allowEdit || rowActions.length > 0) && <th scope="col">Actions</th>}</tr></thead>
             <tbody>
               {data.items.map((row) => (
-                <tr key={row.id}>
+                <tr key={row.id} className={rowClassName?.(row) || undefined}>
                   {columns.map((c) => <td key={c.key}>{c.render ? c.render(row) : (row[c.key] ?? '—')}</td>)}
                   {(review || allowEdit || rowActions.length > 0) && (
                     <td className="actions">

@@ -39,8 +39,8 @@ export default function SmartClassify() {
   }
 
   return (
-    <div className="resident-main" style={{ maxWidth: '600px', margin: '0 auto', padding: '1.5rem' }}>
-      <h1>Anong uri ng concern?</h1>
+    <div className="resident-classify-page">
+      <header className="resident-page-heading"><span className="resident-eyebrow">HELP CHOOSING A SERVICE</span><h1>Anong uri ng concern?</h1><p>We'll help you choose between a community report and a formal complaint.</p></header>
       <p className="muted">Hindi ka sigurado kung Report o Complaint ang dapat i-file? Ilarawan ang iyong concern at tutulungan ka naming pumili.</p>
 
       <div className="card" style={{ marginBottom: '1rem' }}>

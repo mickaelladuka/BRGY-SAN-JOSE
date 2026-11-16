@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import OfflineBanner from './OfflineBanner'
 import NotificationBell from './NotificationBell'
 import { api } from '../lib/api'
-import { LayoutDashboard, Users, MessageSquareText, ClipboardList, Link2, CalendarDays, Megaphone, ScrollText, UserCog, FileText, ChevronDown, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Users, MessageSquareText, ClipboardList, Megaphone, ScrollText, UserCog, FileText, Building2, ChevronDown, ChevronRight, LogOut } from 'lucide-react'
 
 const NAV = [
   { section: 'Overview', items: [
@@ -16,9 +16,15 @@ const NAV = [
       { to: '/admin/residents', label: 'All Residents', icon: Users },
       { to: '/admin/applications', label: 'Resident Applications', icon: FileText },
     ] },
-    { to: '/admin/complaints', label: 'Complaints', icon: MessageSquareText },
+    { to: '/admin/complaints', label: 'Complaints', icon: MessageSquareText, hasSubmenu: true, submenu: [
+      { to: '/admin/complaints', label: 'Complaint Records', icon: MessageSquareText, end: true },
+      { to: '/admin/complaints/scheduling', label: 'Complaint Scheduling', icon: ClipboardList },
+    ] },
+    { to: '/admin/departments', label: 'Department Management', icon: Building2, hasSubmenu: true, submenu: [
+      { to: '/admin/departments', label: 'Departments', icon: Building2 },
+      { to: '/admin/officials', label: 'Officials', icon: UserCog },
+    ] },
     { to: '/admin/reports', label: 'Reports', icon: ClipboardList },
-    { to: '/admin/officials', label: 'Barangay Officials', icon: UserCog },
   ] },
   { section: 'Communication', items: [
     { to: '/admin/announcements', label: 'Announcements', icon: Megaphone },
@@ -31,20 +37,40 @@ const NAV = [
 export default function AdminLayout() {
   const { session, logout, bypassActive } = useAuth()
   const [open, setOpen] = useState(false)
-  const [expandedMenus, setExpandedMenus] = useState({ Residents: true })
+  const [expandedMenus, setExpandedMenus] = useState({ Residents: true, Complaints: true })
   const [pendingApps, setPendingApps] = useState(0)
-  const initial = (session?.email?.[0] || 'A').toUpperCase()
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef(null)
+  const avatarName = session?.fullName || session?.email || 'Administrator'
+  const initials = avatarName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
+  const roleLabel = {
+    Admin: 'Administrator',
+    SuperAdmin: 'Super Administrator',
+    OIC: 'Office In Charge',
+    Secretary: 'Secretary',
+    AdminStaff: 'Admin Staff',
+    SupportingStaff: 'Supporting Staff',
+  }[session?.role] || 'Administrator'
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { data } = await api.get('/api/applications?status=Pending+Verification&page=1&pageSize=1')
+        const { data } = await api.get('/api/applications?status=Pending+Review&page=1&pageSize=1')
         setPendingApps(data?.total ?? 0)
-      } catch { /* ignore */ }
+      } catch {
+        setPendingApps(0)
+      }
     }
     load()
-    const t = setInterval(load, 60000)
-    return () => clearInterval(t)
+    const refreshVisiblePage = () => {
+      if (document.visibilityState === 'visible') load()
+    }
+    const t = setInterval(refreshVisiblePage, 15000)
+    window.addEventListener('focus', refreshVisiblePage)
+    return () => {
+      clearInterval(t)
+      window.removeEventListener('focus', refreshVisiblePage)
+    }
   }, [])
 
   useEffect(() => {
@@ -53,6 +79,20 @@ export default function AdminLayout() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
+
+  useEffect(() => {
+    if (!profileOpen) return undefined
+    const closeOnOutsideClick = (event) => {
+      if (!profileRef.current?.contains(event.target)) setProfileOpen(false)
+    }
+    const closeOnEscape = (event) => event.key === 'Escape' && setProfileOpen(false)
+    document.addEventListener('pointerdown', closeOnOutsideClick)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [profileOpen])
 
   const toggleMenu = (label) => {
     setExpandedMenus((prev) => ({ ...prev, [label]: !prev[label] }))
@@ -96,6 +136,7 @@ export default function AdminLayout() {
                               <NavLink
                                 key={sub.to}
                                 to={sub.to}
+                                end={sub.end}
                                 onClick={() => setOpen(false)}
                                 className={({ isActive }) => `nav nav-sub${isActive ? ' active' : ''}`}
                               >
@@ -128,7 +169,13 @@ export default function AdminLayout() {
             </div>
           ))}
         </nav>
-        <div className="sidebar-foot">Rodriguez, Rizal</div>
+        <div className="sidebar-bottom">
+          <button type="button" className="sidebar-logout" onClick={() => { setOpen(false); logout() }}>
+            <LogOut size={17} strokeWidth={1.8} />
+            <span>Log out</span>
+          </button>
+          <div className="sidebar-foot">Rodriguez, Rizal</div>
+        </div>
       </aside>
       {open && <div className="scrim" onClick={() => setOpen(false)} />}
 
@@ -139,14 +186,28 @@ export default function AdminLayout() {
           <div className="top-spacer" />
           {bypassActive && <span className="dev-notice">Dev device bypass active</span>}
           <NotificationBell />
-          <div className="user-chip">
-            <span className="avatar" aria-hidden="true">{initial}</span>
-            <span className="user-meta">
-              <span className="user-email">{session?.email}</span>
-              <span className="user-role">Administrator</span>
-            </span>
+          <div className="admin-profile" ref={profileRef}>
+            <button type="button" className="user-chip" aria-expanded={profileOpen} aria-haspopup="menu" onClick={() => setProfileOpen((value) => !value)}>
+              <span className="avatar" aria-hidden="true">{initials || 'A'}</span>
+              <span className="user-meta">
+                <span className="user-email">{session?.email}</span>
+                <span className="user-role">{roleLabel}</span>
+              </span>
+              <ChevronDown size={15} aria-hidden="true" />
+            </button>
+            {profileOpen && (
+              <div className="admin-profile-menu" role="menu">
+                <div className="admin-profile-menu-identity">
+                  <strong>{avatarName}</strong>
+                  <span>{session?.email}</span>
+                  <small>{roleLabel}</small>
+                </div>
+                <button type="button" role="menuitem" onClick={() => { setProfileOpen(false); logout() }}>
+                  <LogOut size={16} aria-hidden="true" /> Log out
+                </button>
+              </div>
+            )}
           </div>
-          <button type="button" className="btn btn-outline btn-sm" onClick={logout}>Log out</button>
         </header>
         <main className="admin-main" id="main"><Outlet /></main>
       </div>

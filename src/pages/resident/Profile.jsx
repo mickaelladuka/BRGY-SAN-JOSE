@@ -102,13 +102,13 @@ export default function Profile() {
   const initials = fullName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
 
   return (
-    <>
-      <h1>My profile</h1>
+    <div className="resident-profile-page">
+      <header className="resident-page-heading"><span className="resident-eyebrow">YOUR ACCOUNT</span><h1>My profile</h1><p>Manage your personal and contact information.</p></header>
       {missing && <Alert type="info">Your resident profile is not set up yet. Fill in your details and save.</Alert>}
       <Alert>{error}</Alert><Alert type="success">{ok}</Alert>
 
       {/* Profile Card */}
-      <div className="card" style={{ textAlign: 'center', padding: '1.5rem' }}>
+      <div className="card resident-profile-hero" style={{ textAlign: 'center', padding: '1.5rem' }}>
         {f.photoUrl ? (
           <img src={f.photoUrl.startsWith('http') ? f.photoUrl : `${API_BASE_URL}${f.photoUrl}`} alt="Profile" style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto .75rem', border: '3px solid var(--line)' }} />
         ) : (
@@ -122,7 +122,7 @@ export default function Profile() {
       </div>
 
       {/* Personal Info */}
-      <div className="card">
+      <div className="card resident-profile-section">
         <h2 style={{ fontSize: '1rem', marginBottom: '.75rem' }}>Personal Information</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.5rem 1rem' }}>
           <div><span className="muted" style={{ fontSize: '.75rem' }}>First name</span><div style={{ fontWeight: 500 }}>{f.firstName || '—'}</div></div>
@@ -134,7 +134,7 @@ export default function Profile() {
       </div>
 
       {/* Contact */}
-      <div className="card">
+      <div className="card resident-profile-section">
         <h2 style={{ fontSize: '1rem', marginBottom: '.75rem' }}>Contact</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem' }}>
@@ -230,6 +230,6 @@ export default function Profile() {
       </button>
 
       <p className="muted">Other changes (such as correcting your records) are handled by the barangay office.</p>
-    </>
+    </div>
   )
 }

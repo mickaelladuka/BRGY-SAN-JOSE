@@ -5,7 +5,7 @@ import Receipt from '../../components/Receipt'
 import { useOnline } from '../../components/OfflineBanner'
 import { api, getErrorMessage, getFieldErrors } from '../../lib/api'
 import { COMPLAINT_CATEGORIES } from '../../lib/format'
-import { addToQueue, getQueueCount } from '../../lib/offlineQueue'
+import { addToQueue } from '../../lib/offlineQueue'
 import { MapPin, Loader2 } from 'lucide-react'
 import LocationPicker from '../../components/LocationPicker'
 
@@ -97,15 +97,15 @@ export default function ComplaintNew() {
   )
   return (
     <>
-      <h1>File a complaint</h1>
-      <form className="card" onSubmit={submit} noValidate>
+      <header className="resident-page-heading"><span className="resident-eyebrow">BARANGAY SERVICE REQUEST</span><h1>File a complaint</h1><p>Provide the details so the barangay can review your concern.</p></header>
+      <form className="card resident-submission-form" onSubmit={submit} noValidate>
         <Alert>{error}</Alert>
         <Field label="Category" htmlFor="c-cat" error={errors.category} required>
           <select id="c-cat" value={f.category} onChange={set('category')}><option value="">Select…</option>{COMPLAINT_CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select>
         </Field>
         <Field label="Subject" htmlFor="c-sub" error={errors.subject} required><input id="c-sub" value={f.subject} onChange={set('subject')} maxLength={150} /></Field>
         <Field label="Location (if applicable)" htmlFor="c-loc" error={errors.location}>
-          <div style={{ display: 'flex', gap: '.5rem' }}>
+          <div className="resident-location-controls" style={{ display: 'flex', gap: '.5rem' }}>
             <input id="c-loc" value={f.location} onChange={set('location')} maxLength={250} placeholder="Street, landmark, or area (editable)" style={{ flex: 1 }} />
             <button type="button" className="btn btn-outline btn-sm" onClick={useCurrentLocation} disabled={locating} style={{ flexShrink: 0, minWidth: 'auto' }}>
               {locating ? <Loader2 size={16} strokeWidth={1.75} style={{ animation: 'spin 1s linear infinite' }} /> : <MapPin size={16} strokeWidth={1.75} />}

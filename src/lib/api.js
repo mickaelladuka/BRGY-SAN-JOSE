@@ -2,6 +2,10 @@ import axios from 'axios'
 
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5085').replace(/\/$/, '')
 export const UNAUTHORIZED_EVENT = 'annex6:unauthorized'
+let apiErrorNotifier = null
+let apiSuccessNotifier = null
+export const setApiErrorNotifier = (notifier) => { apiErrorNotifier = notifier }
+export const setApiSuccessNotifier = (notifier) => { apiSuccessNotifier = notifier }
 
 // The access token lives in module memory (and, for page refreshes, in sessionStorage via AuthContext).
 // It is never written to localStorage and never cached by the service worker.
@@ -25,12 +29,20 @@ api.interceptors.request.use((cfg) => {
 })
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    if (res.config?.globalSuccessMessage) {
+      try { apiSuccessNotifier?.(res.config.globalSuccessMessage) } catch { /* keep successful API response intact */ }
+    }
+    return res
+  },
   (err) => {
     // A 401 while holding a token means it expired or was revoked: tell the auth layer to sign out.
     if (err.response?.status === 401 && tokenStore.get()) {
       window.dispatchEvent(new Event(UNAUTHORIZED_EVENT))
     }
+    // Centralized, safe feedback for API failures. Validation responses are
+    // presented as a persistent summary by the global notification provider.
+    try { apiErrorNotifier?.(err) } catch { /* notification UI must not replace the API error */ }
     return Promise.reject(err)
   },
 )

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react'
+import { Children, cloneElement, isValidElement, useEffect, useId, useRef, useState } from 'react'
 import { AlertCircle, CheckCircle2, AlertTriangle, Info, Inbox } from 'lucide-react'
 import { fmtDateTime } from '../lib/format'
 
@@ -78,17 +78,51 @@ export function StatusBadge({ status }) {
 }
 
 export function Field({ label, error, hint, required, children, htmlFor }) {
+  const errorId = useId()
+  const wrapperRef = useRef(null)
+  const [dismissedError, setDismissedError] = useState(null)
+  const visibleError = error && dismissedError !== error ? error : ''
+  useEffect(() => {
+    const form = wrapperRef.current?.closest('form')
+    if (!form) return undefined
+    const resetForSubmit = () => setDismissedError(null)
+    form.addEventListener('submit', resetForSubmit, true)
+    return () => form.removeEventListener('submit', resetForSubmit, true)
+  }, [error])
+  const associateError = (node) => {
+    if (!isValidElement(node)) return node
+    if (typeof node.type === 'string' && ['input', 'select', 'textarea'].includes(node.type)) {
+      const describedBy = [node.props['aria-describedby'], visibleError ? errorId : null].filter(Boolean).join(' ')
+      const originalChange = node.props.onChange
+      return cloneElement(node, {
+        'aria-invalid': visibleError ? 'true' : undefined,
+        'aria-describedby': describedBy || undefined,
+        onChange: (event) => {
+          originalChange?.(event)
+          if (!visibleError) return
+          const control = event.currentTarget
+          const value = control.type === 'checkbox' || control.type === 'radio' ? control.checked : String(control.value || '').trim()
+          const minimum = visibleError.toLowerCase().match(/at least\s+(\d+)\s+characters?/)
+          const enoughCharacters = !minimum || String(control.value || '').trim().length >= Number(minimum[1])
+          const validEmail = !/email|e-mail/.test(visibleError.toLowerCase()) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(control.value || '').trim())
+          if (value && enoughCharacters && validEmail && (!control.validity || control.validity.valid)) setDismissedError(error)
+        },
+      })
+    }
+    if (node.props.children) return cloneElement(node, {}, Children.map(node.props.children, associateError))
+    return node
+  }
   return (
-    <div className={`field${error ? ' has-error' : ''}`}>
+    <div ref={wrapperRef} className={`field${visibleError ? ' has-error' : ''}`}>
       <label htmlFor={htmlFor}>{label}{required && <span aria-hidden="true" className="req"> *</span>}</label>
-      {children}
-      {hint && !error && <small className="hint">{hint}</small>}
-      {error && <small className="error-text" role="alert">{error}</small>}
+      {Children.map(children, associateError)}
+      {hint && !visibleError && <small className="hint">{hint}</small>}
+      {visibleError && <small id={errorId} className="error-text" role="alert">{visibleError}</small>}
     </div>
   )
 }
 
-export function Modal({ title, onClose, children, wide, footer }) {
+export function Modal({ title, subtitle, onClose, children, wide, footer, className = '' }) {
   const ref = useRef(null)
   const closeRef = useRef(onClose)
   const titleId = useId()
@@ -99,7 +133,30 @@ export function Modal({ title, onClose, children, wide, footer }) {
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     ref.current?.focus()
-    const onKey = (e) => e.key === 'Escape' && closeRef.current()
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        closeRef.current()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const focusable = ref.current?.querySelectorAll(
+        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
+      )
+      if (!focusable?.length) {
+        e.preventDefault()
+        ref.current?.focus()
+        return
+      }
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('keydown', onKey)
@@ -109,9 +166,12 @@ export function Modal({ title, onClose, children, wide, footer }) {
   }, [])
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={`modal${wide ? ' modal-wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={ref}>
+      <div className={`modal${wide ? ' modal-wide' : ''}${className ? ` ${className}` : ''}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={ref}>
         <div className="modal-head">
-          <h2 id={titleId}>{title}</h2>
+          <div className="modal-title-group">
+            <h2 id={titleId}>{title}</h2>
+            {subtitle && <p className="modal-subtitle">{subtitle}</p>}
+          </div>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Close">×</button>
         </div>
         <div className="modal-body">{children}</div>

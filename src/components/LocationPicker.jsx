@@ -38,13 +38,13 @@ function LocationMarker({ position, setPosition, onLocationSelect }) {
 }
 
 export default function LocationPicker({ value, lat, lng, onChange, onClose }) {
-  const [position, setPosition] = useState(lat && lng ? { lat, lng } : null)
+  const [position, setPosition] = useState(lat != null && lng != null ? { lat, lng } : null)
   const [loading, setLoading] = useState(false)
   const [address, setAddress] = useState(value || '')
 
   // Geocode address to coordinates on mount if no coords provided
   useEffect(() => {
-    if (lat && lng) {
+    if (lat != null && lng != null) {
       setPosition({ lat, lng })
       return
     }
@@ -76,7 +76,7 @@ export default function LocationPicker({ value, lat, lng, onChange, onClose }) {
       if (addr.city || addr.town || addr.municipality) parts.push(addr.city || addr.town || addr.municipality)
       if (addr.state) parts.push(addr.state)
       if (parts.length > 0) return parts.join(', ')
-      return data.display_name || `${lat.toFixed(6)}, ${longitude.toFixed(6)}`
+      return data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`
     } catch {
       return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
     }

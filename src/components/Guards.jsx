@@ -3,6 +3,7 @@ import { homeFor, useAuth } from '../context/AuthContext'
 import { requiredDeviceFor, useDeviceType } from '../lib/device'
 import { FullPageSpinner } from './ui'
 import RestrictedDevice from './RestrictedDevice'
+import { hasAdminAccess } from '../lib/adminNavigation'
 
 /**
  * Order of checks (nothing from `children` renders until all pass):
@@ -35,5 +36,20 @@ export function PublicOnly({ children }) {
   const { session, loading } = useAuth()
   if (loading) return <FullPageSpinner label="Loading…" />
   if (session) return <Navigate to={homeFor(session.role)} replace />
+  return children
+}
+
+export function RequireAdminPermission({ permission, children }) {
+  const { session } = useAuth()
+  if (!hasAdminAccess(session?.role, permission)) {
+    return (
+      <section className="card" role="status" style={{ maxWidth: '640px', margin: '2rem auto' }}>
+        <h1 style={{ marginTop: 0 }}>Access unavailable</h1>
+        <p className="muted" style={{ marginBottom: 0 }}>
+          Your account does not have permission to view this administrative module. Contact the OIC if you need access.
+        </p>
+      </section>
+    )
+  }
   return children
 }

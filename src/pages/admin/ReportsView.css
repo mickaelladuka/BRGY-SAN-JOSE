@@ -1,0 +1,31 @@
+.reports-view-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: "list details";
+  gap: 1rem;
+  min-height: calc(100vh - 120px);
+}
+
+.reports-view-primary-filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) minmax(140px, 1fr);
+  gap: .65rem;
+  margin-bottom: .75rem;
+}
+
+.reports-view-primary-filters > * {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .reports-view-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "list" "details";
+  }
+}
+
+@media (max-width: 520px) {
+  .reports-view-primary-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

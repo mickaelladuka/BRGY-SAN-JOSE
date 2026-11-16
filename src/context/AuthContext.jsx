@@ -4,6 +4,7 @@ import { clearBypass, readBypass, verifyBypassCode, bypassFeatureEnabled } from 
 
 const SESSION_KEY = 'annex6.session'
 const ROLE_CLAIM = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+const USER_ID_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
 
 export function decodeJwt(token) {
   try {
@@ -36,13 +37,18 @@ function buildSession(token, fallbackRole, email) {
   // The role is taken from the signed token (issued by the server), not from anything the UI typed.
   const role = normalizeRole(claims[ROLE_CLAIM] ?? claims.role ?? fallbackRole)
   if (!role) return null
-  return { token, role, email: email || claims.email || '', exp: claims.exp * 1000 }
+  return { token, role, email: email || claims.email || '', userId: claims[USER_ID_CLAIM] || claims.sub || '', exp: claims.exp * 1000 }
 }
 
 function readStoredSession() {
   try {
     const s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null')
-    return s && s.token && s.exp > Date.now() ? s : null
+    if (!s || !s.token || s.exp <= Date.now()) return null
+    if (!s.userId) {
+      const claims = decodeJwt(s.token)
+      s.userId = claims?.[USER_ID_CLAIM] || claims?.sub || ''
+    }
+    return s
   } catch {
     return null
   }

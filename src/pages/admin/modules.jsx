@@ -114,29 +114,8 @@ export const operations = {
   toForm: (r) => ({ ...r, date: toDateInput(r.date) }),
 }
 
-const annState = (a) => (a.isArchived ? 'Archived' : a.isPublished ? 'Published' : 'Draft')
-export const announcements = {
-  title: 'Announcements', endpoint: '/api/announcements/manage', createEndpoint: '/api/announcements', updateEndpoint: '/api/announcements', searchPlaceholder: 'Search title, content or category',
-  allowCreate: true, allowEdit: true,
-  filters: [{ name: 'state', label: 'State', options: [{ value: 'draft', label: 'Draft' }, { value: 'published', label: 'Published' }, { value: 'archived', label: 'Archived' }] }],
-  columns: [
-    { key: 'title', label: 'Title' }, { key: 'category', label: 'Category' },
-    { key: 'state', label: 'State', render: (a) => <StatusBadge status={annState(a)} /> },
-    { key: 'publishedAt', label: 'Published', render: (a) => fmtDate(a.publishedAt) },
-  ],
-  fields: [
-    { name: 'title', label: 'Title', required: true, full: true, maxLength: 150 },
-    { name: 'category', label: 'Category', maxLength: 50 },
-    { name: 'content', label: 'Content', type: 'textarea', required: true, full: true, maxLength: 4000 },
-  ],
-  rowActions: [
-    { label: 'Publish', show: (a) => !a.isPublished && !a.isArchived, confirm: (a) => `Publish “${a.title}”? Residents will be able to see it immediately.`, success: 'Announcement published.', run: (a) => api.post(`/api/announcements/${a.id}/publish`) },
-    { label: 'Archive', danger: true, show: (a) => !a.isArchived, confirm: (a) => `Archive “${a.title}”? It will no longer be shown to residents.`, success: 'Announcement archived.', run: (a) => api.post(`/api/announcements/${a.id}/archive`) },
-  ],
-}
-
 export const communityIssues = {
-  title: 'Community Issues', endpoint: '/api/community-issues', searchPlaceholder: 'Search title, summary or location',
+  title: 'Monitored Community Issues', endpoint: '/api/community-issues', searchPlaceholder: 'Search title, summary or location',
   allowCreate: true, allowEdit: true,
   filters: [{ name: 'status', label: 'Status', options: [{ value: 'Open', label: 'Open' }, { value: 'In Progress', label: 'In Progress' }, { value: 'Resolved', label: 'Resolved' }, { value: 'Closed', label: 'Closed' }] }],
   columns: [
@@ -149,10 +128,33 @@ export const communityIssues = {
     { name: 'title', label: 'Issue title', required: true, full: true, maxLength: 150 },
     { name: 'summary', label: 'Summary', type: 'textarea', required: true, full: true, maxLength: 2000 },
     { name: 'location', label: 'Affected area', maxLength: 250, full: true },
+    { name: 'status', label: 'Monitoring status', type: 'select', required: true, options: ['Open', 'In Progress', 'Resolved', 'Closed'], default: 'Open' },
+    { name: 'resolutionNotes', label: 'Resolution notes', type: 'textarea', full: true, maxLength: 2000 },
     { name: 'assignedToUserId', label: 'Assigned to (user ID)', maxLength: 450 },
   ],
-  toForm: (r) => ({ title: r.title, summary: r.summary, location: r.location ?? '', assignedToUserId: r.assignedToUserId ?? '' }),
-  toPayload: (v) => ({ title: v.title.trim(), summary: v.summary.trim(), location: v.location?.trim() || null, assignedToUserId: v.assignedToUserId?.trim() || null }),
+  toForm: (r) => ({ title: r.title, summary: r.summary, location: r.location ?? '', status: r.status, resolutionNotes: r.resolutionNotes ?? '', assignedToUserId: r.assignedToUserId ?? '' }),
+  toPayload: (v) => ({
+    title: v.title.trim(), summary: v.summary.trim(), location: v.location?.trim() || null,
+    status: v.status || 'Open', resolutionNotes: v.resolutionNotes?.trim() || null,
+    assignedToUserId: v.assignedToUserId?.trim() || null,
+  }),
+  review: {
+    viewTitle: 'View Community Issue',
+    statuses: [],
+    rows: (d) => [
+      ['Issue', d.title],
+      ['Summary', d.summary],
+      ['Affected area', d.location || '—'],
+      ['Status', d.status],
+      ['Assigned to', d.assignedToUserName || '—'],
+      ['Related complaints', d.complaints?.length
+        ? d.complaints.map((complaint) => `${complaint.referenceNumber} · ${complaint.category} · ${fmtDateTime(complaint.submittedAt)}`).join('\n')
+        : 'No complaints linked'],
+      ['Resolution notes', d.resolutionNotes || '—'],
+      ['Created', fmtDateTime(d.createdAt)],
+      ['Last updated', fmtDateTime(d.updatedAt)],
+    ],
+  },
 }
 
 export const officials = {
@@ -183,18 +185,27 @@ export const officials = {
 }
 
 export const applications = {
-  title: 'Resident Applications', endpoint: '/api/applications', searchPlaceholder: 'Search name, email or contact',
+  title: 'Resident Applications', endpoint: '/api/applications', searchPlaceholder: 'Search name, email, contact, or application ID',
+  refreshInterval: 15000,
+  rowClassName: (r) => r.status === 'Correction Resubmitted' ? 'application-resubmitted-row' : '',
   allowCreate: false, allowEdit: false,
-  filters: [{ name: 'status', label: 'Status', options: [{ value: 'Pending Verification', label: 'Pending' }, { value: 'Under Review', label: 'Under Review' }, { value: 'Verified', label: 'Verified' }, { value: 'Rejected', label: 'Rejected' }] }],
+  filters: [{ name: 'status', label: 'Status', options: [
+    { value: 'Pending Review', label: 'Pending Review' },
+    { value: 'Correction Resubmitted', label: 'Correction Resubmitted' },
+    { value: 'Pending Verification', label: 'Pending Verification' },
+    { value: 'Under Review', label: 'Under Review' },
+    { value: 'Additional Information Required', label: 'Needs Correction' },
+    { value: 'Verified', label: 'Verified' },
+    { value: 'Rejected', label: 'Rejected' },
+  ] }],
   columns: [
     { key: 'fullName', label: 'Name' }, { key: 'email', label: 'Email' },
     { key: 'contactNumber', label: 'Contact' }, { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status} /> },
-    { key: 'createdAt', label: 'Submitted', render: (r) => fmtDateTime(r.createdAt) },
+    { key: 'lastSubmittedAt', label: 'Submitted', render: (r) => fmtDateTime(r.lastSubmittedAt || r.createdAt) },
   ],
   rowActions: [
     { label: 'Review', show: () => true, navigate: (r) => `/admin/applications/${r.id}` },
-    { label: 'Verify', show: (r) => r.status !== 'Verified', confirm: (r) => `Verify ${r.fullName}?`, success: 'Application verified.', run: (r) => api.post(`/api/admin/resident-registrations/${r.id}/review`, { status: 'Verified', remarks: 'Verified by admin' }) },
-    { label: 'Reject', danger: true, show: (r) => r.status !== 'Rejected', confirm: (r) => `Reject ${r.fullName}?`, success: 'Application rejected.', run: (r) => api.post(`/api/admin/resident-registrations/${r.id}/review`, { status: 'Rejected', remarks: 'Rejected by admin' }) },
+    { label: 'Reject', danger: true, show: (r) => !['Rejected', 'Verified'].includes(r.status), confirm: (r) => `Reject ${r.fullName}?`, success: 'Application rejected.', run: (r) => api.post(`/api/admin/resident-registrations/${r.id}/review`, { status: 'Rejected', remarks: 'Rejected by admin' }) },
   ],
 }
 

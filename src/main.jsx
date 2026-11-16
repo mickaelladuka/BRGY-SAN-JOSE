@@ -5,12 +5,15 @@ import './index.css'
 import 'leaflet/dist/leaflet.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
+import { GlobalNotificationsProvider } from './context/GlobalNotifications'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <GlobalNotificationsProvider>
+          <App />
+        </GlobalNotificationsProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

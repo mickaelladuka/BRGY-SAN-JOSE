@@ -8,6 +8,9 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 const TYPES = ['Resident', 'Non-Resident', 'Government Personnel', 'Organization Representative', 'Service Provider / Contractor', 'Other']
 const PURPOSES = ['Inquiry / General Assistance', 'Complaint-Related Consultation', 'Document Request', 'Certificate or Clearance-Related Transaction', 'Department Consultation', 'Follow-Up Transaction', 'Meeting / Appointment', 'Official Government Business', 'Delivery / Service', 'Other']
 
+
+
+
 export default function VisitorLog() {
   const [tab, setTab] = useState('overview')
   const [dashboard, setDashboard] = useState(null)
